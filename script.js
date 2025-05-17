@@ -22,7 +22,7 @@ function selectTest(testType) {
     // MBTI测试
     document.getElementById('app').className = 'card mbti-theme';
     currentScores = mbtiScores;
-    loadQuestions('questions.json');
+    loadQuestions('mbti_questions.json');
   } else if (testType === 'career') {
     // 职业兴趣测试
     document.getElementById('app').className = 'card career-theme';
