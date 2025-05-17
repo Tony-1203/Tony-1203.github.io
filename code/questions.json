@@ -1,0 +1,682 @@
+[
+  {
+    "category": "一、哪一个答案最能贴切的描绘你一般的感受或行为？",
+    "questions": [
+      {
+        "question": "当你要外出一整天,你会",
+        "options": [
+          { "text": "计划你要做什么和在什么时候做", "dimension": "J" },
+          { "text": "说去就去", "dimension": "P" }
+        ]
+      },
+      {
+        "question": "你认为自己是一个",
+        "options": [
+          { "text": "较为随兴所至的人", "dimension": "P" },
+          { "text": "较为有条理的人", "dimension": "J" }
+        ]
+      },
+      {
+        "question": "假如你是一位老师,你会选教",
+        "options": [
+          { "text": "以事实为主的课程", "dimension": "S" },
+          { "text": "涉及理论的课程", "dimension": "N" }
+        ]
+      },
+      {
+        "question": "你通常",
+        "options": [
+          { "text": "与人容易混熟", "dimension": "E" },
+          { "text": "比较沉静或矜持", "dimension": "I" }
+        ]
+      },
+      {
+        "question": "一般来说,你和哪些人比较合得来？",
+        "options": [
+          { "text": "富于想象力的人", "dimension": "N" },
+          { "text": "现实的人", "dimension": "S" }
+        ]
+      },
+      {
+        "question": "你是否经常让",
+        "options": [
+          { "text": "你的情感支配你的理智", "dimension": "F" },
+          { "text": "你的理智主宰你的情感", "dimension": "T" }
+        ]
+      },
+      {
+        "question": "处理许多事情上,你会喜欢",
+        "options": [
+          { "text": "凭兴所至行事", "dimension": "P" },
+          { "text": "按照计划行事", "dimension": "J" }
+        ]
+      },
+      {
+        "question": "你是否",
+        "options": [
+          { "text": "容易让人了解", "dimension": "E" },
+          { "text": "是B难于让人了解", "dimension": "I" }
+        ]
+      },
+      {
+        "question": "按照程序表做事,",
+        "options": [
+          { "text": "合你心意", "dimension": "J" },
+          { "text": "令你感到束缚", "dimension": "P" }
+        ]
+      },
+      {
+        "question": "当你有一份特别的任务,你会喜欢",
+        "options": [
+          { "text": "开始前小心组织计划", "dimension": "J" },
+          { "text": "边做边找须做什么", "dimension": "P" }
+        ]
+      },
+      {
+        "question": "在大多数情况下,你会选择",
+        "options": [
+          { "text": "顺其自然", "dimension": "P" },
+          { "text": "按程序表做事", "dimension": "J" }
+        ]
+      },
+      {
+        "question": "大多数人会说你是一个",
+        "options": [
+          { "text": "重视自我隐私的人", "dimension": "I" },
+          { "text": "非常坦率开放的人", "dimension": "E" }
+        ]
+      },
+      {
+        "question": "你宁愿被人认为是一个",
+        "options": [
+          { "text": "实事求是的人", "dimension": "S" },
+          { "text": "机灵的人", "dimension": "N" }
+        ]
+      },
+      {
+        "question": "在一大群人当中,通常是",
+        "options": [
+          { "text": "你介绍大家认识", "dimension": "E" },
+          { "text": "别人介绍你", "dimension": "I" }
+        ]
+      },
+      {
+        "question": "你会跟哪些人做朋友？",
+        "options": [
+          { "text": "常提出新注意的", "dimension": "N" },
+          { "text": "脚踏实地的", "dimension": "S" }
+        ]
+      },
+      {
+        "question": "你倾向",
+        "options": [
+          { "text": "重视感情多于逻辑", "dimension": "F" },
+          { "text": "重视逻辑多于感情", "dimension": "T" }
+        ]
+      },
+      {
+        "question": "你比较喜欢",
+        "options": [
+          { "text": "坐观事情发展才作计划", "dimension": "P" },
+          { "text": "很早就作计划", "dimension": "J" }
+        ]
+      },
+      {
+        "question": "你喜欢花很多的时间",
+        "options": [
+          { "text": "一个人独处", "dimension": "I" },
+          { "text": "和别人在一起", "dimension": "E" }
+        ]
+      },
+      {
+        "question": "与很多人一起会",
+        "options": [
+          { "text": "令你活力培增", "dimension": "E" },
+          { "text": "常常令你心力憔悴", "dimension": "I" }
+        ]
+      },
+      {
+        "question": "你比较喜欢",
+        "options": [
+          {
+            "text": "很早便把约会、社交聚集等事情安排妥当",
+            "dimension": "J"
+          },
+          { "text": "无拘无束，看当时有什么好玩就做什么", "dimension": "P" }
+        ]
+      },
+      {
+        "question": "计划一个旅程时,你较喜欢",
+        "options": [
+          { "text": "大部分的时间都是跟当天的感觉行事", "dimension": "P" },
+          { "text": "事先知道大部分的日子会做什么", "dimension": "J" }
+        ]
+      },
+      {
+        "question": "在社交聚会中,你",
+        "options": [
+          { "text": "有时感到郁闷", "dimension": "I" },
+          { "text": "常常乐在其中", "dimension": "E" }
+        ]
+      },
+      {
+        "question": "你通常",
+        "options": [
+          { "text": "和别人容易混熟", "dimension": "E" },
+          { "text": "趋向自处一隅", "dimension": "I" }
+        ]
+      },
+      {
+        "question": "哪些人会更吸引你？",
+        "options": [
+          { "text": "一个思想敏捷及非常聪颖的人", "dimension": "N" },
+          { "text": "实事求是，具丰富常识的人", "dimension": "S" }
+        ]
+      },
+      {
+        "question": "在日常工作中,你会",
+        "options": [
+          { "text": "颇为喜欢处理迫使你分秒必争的突发", "dimension": "P" },
+          { "text": "通常预先计划，以免要在压力下工作", "dimension": "J" }
+        ]
+      },
+      {
+        "question": "你认为别人一般",
+        "options": [
+          { "text": "要花很长时间才认识你", "dimension": "I" },
+          { "text": "用很短的时间便认识你", "dimension": "E" }
+        ]
+      }
+    ]
+  },
+  {
+    "category": "二、在下列每一对词语中，哪一个词语更合你心意？请仔细想想这些词语的意义，而不要理会他们的字形或读音。",
+    "questions": [
+      {
+        "question": "",
+        "options": [
+          { "text": "注重隐私", "dimension": "I" },
+          { "text": "坦率开放", "dimension": "E" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "预先安排的", "dimension": "J" },
+          { "text": "无计划的", "dimension": "P" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "抽象", "dimension": "N" },
+          { "text": "具体", "dimension": "S" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "温柔", "dimension": "F" },
+          { "text": "坚定", "dimension": "T" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "思考", "dimension": "T" },
+          { "text": "感受", "dimension": "F" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "事实", "dimension": "S" },
+          { "text": "意念", "dimension": "N" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "冲动", "dimension": "P" },
+          { "text": "决定", "dimension": "J" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "热衷", "dimension": "E" },
+          { "text": "文静", "dimension": "I" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "文静", "dimension": "I" },
+          { "text": "外向", "dimension": "E" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "有系统", "dimension": "J" },
+          { "text": "随意", "dimension": "P" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "理论", "dimension": "N" },
+          { "text": "肯定", "dimension": "S" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "敏感", "dimension": "F" },
+          { "text": "公正", "dimension": "T" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "令人信服", "dimension": "T" },
+          { "text": "感人的", "dimension": "F" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "声明", "dimension": "S" },
+          { "text": "概念", "dimension": "N" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "不受约束", "dimension": "P" },
+          { "text": "预先安排", "dimension": "J" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "矜持", "dimension": "I" },
+          { "text": "健谈", "dimension": "E" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "有条不紊", "dimension": "J" },
+          { "text": "不拘小节", "dimension": "P" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "意念", "dimension": "N" },
+          { "text": "实况", "dimension": "S" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "同情怜悯", "dimension": "F" },
+          { "text": "远见", "dimension": "T" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "利益", "dimension": "T" },
+          { "text": "祝福", "dimension": "F" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "务实的", "dimension": "S" },
+          { "text": "理论的", "dimension": "N" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "朋友不多", "dimension": "I" },
+          { "text": "朋友众多", "dimension": "E" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "有系统", "dimension": "J" },
+          { "text": "即兴", "dimension": "P" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "富想象的", "dimension": "N" },
+          { "text": "以事论事", "dimension": "S" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "亲切的", "dimension": "F" },
+          { "text": "客观的", "dimension": "T" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "客观的", "dimension": "T" },
+          { "text": "热情的", "dimension": "F" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "建造", "dimension": "S" },
+          { "text": "发明", "dimension": "N" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "文静", "dimension": "I" },
+          { "text": "爱合群", "dimension": "E" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "理论", "dimension": "N" },
+          { "text": "事实", "dimension": "S" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "富同情", "dimension": "F" },
+          { "text": "合逻辑", "dimension": "T" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "具分析力", "dimension": "T" },
+          { "text": "多愁善感", "dimension": "F" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "合情合理", "dimension": "S" },
+          { "text": "令人着迷", "dimension": "N" }
+        ]
+      }
+    ]
+  },
+  {
+    "category": "三、哪一个答案最能贴切地描绘你一般的感受或行为",
+    "questions": [
+      {
+        "question": "当你要在一个星期内完成一个大项目，你在开始的时候会",
+        "options": [
+          { "text": "把要做的不同工作依次列出", "dimension": "J" },
+          { "text": "马上动工", "dimension": "P" }
+        ]
+      },
+      {
+        "question": "在社交场合中，你经常会感到",
+        "options": [
+          { "text": "与某些人很难打开话匣儿和保持对话", "dimension": "I" },
+          { "text": "与多数人都能从容地长谈", "dimension": "E" }
+        ]
+      },
+      {
+        "question": "要做许多人也做的事，你比较喜欢",
+        "options": [
+          { "text": "按照一般认可的方法去做", "dimension": "S" },
+          { "text": "构想一个自己的想法", "dimension": "N" }
+        ]
+      },
+      {
+        "question": "你刚认识的朋友能否说出你的兴趣？",
+        "options": [
+          { "text": "马上可以", "dimension": "E" },
+          { "text": "要待他们真正了解你之后才可以", "dimension": "I" }
+        ]
+      },
+      {
+        "question": "你通常较喜欢的科目是",
+        "options": [
+          { "text": "讲授概念和原则的", "dimension": "N" },
+          { "text": "讲授事实和数据的", "dimension": "S" }
+        ]
+      },
+      {
+        "question": "哪个是较高的赞誉，或称许为？",
+        "options": [
+          { "text": "一贯感性的人", "dimension": "F" },
+          { "text": "一贯理性的人", "dimension": "T" }
+        ]
+      },
+      {
+        "question": "你认为按照程序表做事",
+        "options": [
+          {
+            "text": "有时是需要的，但一般来说你不大喜欢这样做",
+            "dimension": "P"
+          },
+          { "text": "大多数情况下是有帮助而且是你喜欢做的", "dimension": "J" }
+        ]
+      },
+      {
+        "question": "和一群人在一起，你通常会选",
+        "options": [
+          { "text": "跟你很熟悉的个别人谈话", "dimension": "I" },
+          { "text": "参与大伙的谈话", "dimension": "E" }
+        ]
+      },
+      {
+        "question": "在社交聚会上，你会",
+        "options": [
+          { "text": "是说话很多的一个", "dimension": "E" },
+          { "text": "让别人多说话", "dimension": "I" }
+        ]
+      },
+      {
+        "question": "把周末期间要完成的事列成清单，这个主意会",
+        "options": [
+          { "text": "合你意", "dimension": "J" },
+          { "text": "使你提不起劲", "dimension": "P" }
+        ]
+      },
+      {
+        "question": "哪个是较高的赞誉，或称许为",
+        "options": [
+          { "text": "能干的", "dimension": "T" },
+          { "text": "富有同情心", "dimension": "F" }
+        ]
+      },
+      {
+        "question": "你通常喜欢",
+        "options": [
+          { "text": "事先安排你的社交约会", "dimension": "J" },
+          { "text": "随兴之所至做事", "dimension": "P" }
+        ]
+      },
+      {
+        "question": "总的说来，要做一个大型作业时，你会选",
+        "options": [
+          { "text": "边做边想该做什么", "dimension": "P" },
+          { "text": "首先把工作按步细分", "dimension": "J" }
+        ]
+      },
+      {
+        "question": "你能否滔滔不绝地与人聊天",
+        "options": [
+          { "text": "只限于跟你有共同兴趣的人", "dimension": "I" },
+          { "text": "几乎跟任何人都可以", "dimension": "E" }
+        ]
+      },
+      {
+        "question": "你会",
+        "options": [
+          { "text": "跟随一些证明有效的方法", "dimension": "S" },
+          { "text": "分析还有什么毛病，及针对尚未解决的难题", "dimension": "N" }
+        ]
+      },
+      {
+        "question": "为乐趣而阅读时，你会",
+        "options": [
+          { "text": "喜欢奇特或创新的表达方式", "dimension": "N" },
+          { "text": "喜欢作者直话直说", "dimension": "S" }
+        ]
+      },
+      {
+        "question": "你宁愿替哪一类上司（或者老师）工作？",
+        "options": [
+          { "text": "天性淳良，但常常前后不一的", "dimension": "T" },
+          { "text": "言词尖锐但永远合乎逻辑的", "dimension": "F" }
+        ]
+      },
+      {
+        "question": "你做事多数是",
+        "options": [
+          { "text": "按当天心情去做", "dimension": "P" },
+          { "text": "照拟好的程序表去做", "dimension": "J" }
+        ]
+      },
+      {
+        "question": "你是否",
+        "options": [
+          { "text": "可以和任何人按需求从容地交谈", "dimension": "E" },
+          {
+            "text": "只是对某些人或在某种情况下才可以畅所欲言",
+            "dimension": "I"
+          }
+        ]
+      },
+      {
+        "question": "要作决定时，你认为比较重要的是",
+        "options": [
+          { "text": "据事实衡量", "dimension": "T" },
+          { "text": "考虑他人的感受和意见", "dimension": "F" }
+        ]
+      }
+    ]
+  },
+  {
+    "category": "四、在下列每一对词语中，哪一个词语更合你心意？",
+    "questions": [
+      {
+        "question": "",
+        "options": [
+          { "text": "想象的", "dimension": "N" },
+          { "text": "真实的", "dimension": "S" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "仁慈慷慨的", "dimension": "F" },
+          { "text": "意志坚定的", "dimension": "T" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "公正的", "dimension": "T" },
+          { "text": "有关怀心", "dimension": "F" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "制作", "dimension": "S" },
+          { "text": "设计", "dimension": "N" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "可能性", "dimension": "N" },
+          { "text": "必然性", "dimension": "S" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "温柔", "dimension": "F" },
+          { "text": "力量", "dimension": "T" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "实际", "dimension": "T" },
+          { "text": "多愁善感", "dimension": "F" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "制造", "dimension": "S" },
+          { "text": "创造", "dimension": "N" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "新颖的", "dimension": "N" },
+          { "text": "已知的", "dimension": "S" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "同情", "dimension": "F" },
+          { "text": "分析", "dimension": "T" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "坚持己见", "dimension": "T" },
+          { "text": "温柔有爱心", "dimension": "F" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "具体的", "dimension": "S" },
+          { "text": "抽象的", "dimension": "N" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "全心投入", "dimension": "F" },
+          { "text": "有决心的", "dimension": "T" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "能干", "dimension": "T" },
+          { "text": "仁慈", "dimension": "F" }
+        ]
+      },
+      {
+        "question": "",
+        "options": [
+          { "text": "实际", "dimension": "S" },
+          { "text": "创新", "dimension": "N" }
+        ]
+      }
+    ]
+  }
+]
