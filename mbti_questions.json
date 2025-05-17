@@ -55,7 +55,7 @@
         "question": "你是否",
         "options": [
           { "text": "容易让人了解", "dimension": "E" },
-          { "text": "是B难于让人了解", "dimension": "I" }
+          { "text": "难于让人了解", "dimension": "I" }
         ]
       },
       {
@@ -138,10 +138,7 @@
       {
         "question": "你比较喜欢",
         "options": [
-          {
-            "text": "很早便把约会、社交聚集等事情安排妥当",
-            "dimension": "J"
-          },
+          { "text": "很早便把约会、社交聚集等事情安排妥当","dimension": "J" },
           { "text": "无拘无束，看当时有什么好玩就做什么", "dimension": "P" }
         ]
       },
@@ -466,10 +463,7 @@
       {
         "question": "你认为按照程序表做事",
         "options": [
-          {
-            "text": "有时是需要的，但一般来说你不大喜欢这样做",
-            "dimension": "P"
-          },
+          { "text": "有时是需要的，但一般来说你不大喜欢这样做", "dimension": "P"},
           { "text": "大多数情况下是有帮助而且是你喜欢做的", "dimension": "J" }
         ]
       },

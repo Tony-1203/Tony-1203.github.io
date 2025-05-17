@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MBTI 性格测试</title>
+  <title>性格与职业测试</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,9 +11,27 @@
 </head>
 <body>
   <div class="container">
-    <h1>MBTI 性格测试</h1>
+    <h1>性格与职业测试</h1>
     
-    <div class="card" id="app">
+    <!-- 主界面选择器 -->
+    <div class="card" id="main-screen">
+      <h2>请选择测试类型</h2>
+      <div class="test-selection">
+        <button class="test-btn mbti-btn" onclick="selectTest('mbti')">
+          <div class="test-icon mbti-icon">MBTI</div>
+          <div class="test-name">性格测试</div>
+          <div class="test-desc">了解你的人格特质与行为倾向</div>
+        </button>
+        <button class="test-btn career-btn" onclick="selectTest('career')">
+          <div class="test-icon career-icon">RIASEC</div>
+          <div class="test-name">职业兴趣测试</div>
+          <div class="test-desc">发现适合你的职业发展方向</div>
+        </button>
+      </div>
+    </div>
+    
+    <!-- 测试内容区域 -->
+    <div class="card" id="app" style="display: none;">
       <h3 id="category" class="question-category"></h3>
       <h2 id="question">加载中...</h2>
       <div class="progress-container">
