@@ -389,7 +389,92 @@ h2 {
   background-color: #4b5563;
 }
 
-/* 响应式调整 */
+/* 推荐专业样式 */
+.recommended-majors {
+  margin-top: 30px;
+  background-color: #f3f4f6;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+}
+
+.major-section {
+  margin-bottom: 25px;
+}
+
+.major-section h4 {
+  color: #4f46e5;
+  margin-bottom: 15px;
+  font-weight: 600;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 8px;
+}
+
+.major-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 10px;
+}
+
+.major-list li {
+  background-color: white;
+  padding: 10px 15px;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.major-name {
+  font-weight: 500;
+  color: #374151;
+}
+
+.match-score {
+  background-color: #e0f2fe;
+  color: #0369a1;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.major-list li:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  transition: all 0.2s ease;
+}
+
+/* 特质标签组 */
+.characteristics-section {
+  margin-top: 20px;
+}
+
+.characteristics-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.characteristic-tag {
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.characteristic-tag.matched {
+  background-color: #d1fae5;
+  border-color: #a7f3d0;
+  color: #065f46;
+}
+
 @media (max-width: 768px) {
   .test-selection {
     flex-direction: column;
@@ -428,6 +513,10 @@ h2 {
   
   .recommendations-list li {
     margin-bottom: 10px;
+  }
+  
+  .major-list {
+    grid-template-columns: 1fr;
   }
 }
 

@@ -340,6 +340,52 @@ function checkAndShowCombinedButton() {
   }
 }
 
+// 从MBTI和Holland组合中找出特质
+function findCharacteristics(mbti, holland) {
+  const characteristics = new Set();
+  
+  for (let char of holland) {
+    const combination = `${mbti}+${char}`;
+    if (personality_keywords[combination]) {
+      personality_keywords[combination].forEach(keyword => {
+        characteristics.add(keyword);
+      });
+    } else {
+      console.log(`未找到${combination}的相关关键词`);
+    }
+  }
+  
+  return characteristics;
+}
+
+// 根据特质找出推荐专业
+function findRecommendedMajors(characteristics, domainType) {
+  const mapping = domainType === 'history' ? majors_traits_history : majors_traits_physics;
+  const results = {};
+  
+  for (const [major, traits] of Object.entries(mapping)) {
+    // 计算特质匹配数量
+    const traitsSet = new Set(traits);
+    let matchCount = 0;
+    characteristics.forEach(char => {
+      if (traitsSet.has(char)) {
+        matchCount++;
+      }
+    });
+    
+    // 计算匹配比例
+    const ratio = matchCount / traits.length;
+    results[major] = ratio;
+  }
+  
+  // 按匹配比例从高到低排序
+  const sortedResults = Object.entries(results)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10); // 只取前10个专业
+  
+  return sortedResults;
+}
+
 // 显示综合分析结果
 function showCombinedResult() {
   // 隐藏主界面，显示测试界面
@@ -382,6 +428,11 @@ function showCombinedResult() {
     ? Math.round((matchingTypes.length / Math.min(mbtiInfo.bestFit.length, 2)) * 100) 
     : 0;
   
+  // 使用特质和推荐逻辑计算推荐专业
+  const characteristics = findCharacteristics(mbti_result, careerTypes);
+  const historyMajors = findRecommendedMajors(characteristics, 'history');
+  const physicsMajors = findRecommendedMajors(characteristics, 'physics');
+  
   // 获取职业建议
   const recommendations = getCombinedRecommendations(mbti_result, careerTypes[0], careerTypes[1]);
   
@@ -423,6 +474,30 @@ function showCombinedResult() {
             `<p class="match-highlight">你的性格类型和职业兴趣在${matchingTypes.map(t => getTypeFullName(t)).join('、')}方面有很好的一致性。</p>` : 
             `<p class="match-alert">你的性格类型和职业兴趣可能有一些差异，这提示你可能需要在工作中更注重平衡。</p>`}
         </div>
+      </div>
+      
+      <div class="recommended-majors">
+        <h3>推荐专业</h3>
+        
+        <div class="major-section">
+          <h4>文科类推荐专业</h4>
+          <ul class="major-list">
+            ${historyMajors.map(([major, score]) => 
+              `<li><span class="major-name">${major}</span> <span class="match-score">${Math.round(score * 100)}% 匹配</span></li>`
+            ).join('')}
+          </ul>
+        </div>
+        
+        <div class="major-section">
+          <h4>理工类推荐专业</h4>
+          <ul class="major-list">
+            ${physicsMajors.map(([major, score]) => 
+              `<li><span class="major-name">${major}</span> <span class="match-score">${Math.round(score * 100)}% 匹配</span></li>`
+            ).join('')}
+          </ul>
+        </div>
+        
+        <p class="recommendation-note">专业推荐基于你的MBTI性格类型和Holland职业兴趣类型的特质匹配度计算。匹配度越高，表示该专业所需的特质与你的特质越符合。</p>
       </div>
       
       <div class="career-recommendations">
