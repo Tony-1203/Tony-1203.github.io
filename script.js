@@ -7,6 +7,9 @@ let currentScores = mbtiScores; // 默认为MBTI测试
 let current = 0;
 let currentCategory = "";
 let currentTest = ""; // 当前测试类型: "mbti" 或 "career"
+let mbti_result = "";
+let career_result = "";
+let mbti_description = ""; // 存储MBTI测试的性格描述
 
 // 选择测试类型
 function selectTest(testType) {
@@ -125,6 +128,8 @@ function showMBTIResult() {
     (mbtiScores.S > mbtiScores.N ? 'S' : 'N') +
     (mbtiScores.T > mbtiScores.F ? 'T' : 'F') +
     (mbtiScores.J > mbtiScores.P ? 'J' : 'P');
+  
+  mbti_result = result;
 
   const personalityDescriptions = {
     'ISTJ': '严肃、安静、通过全面性和可靠性获得成功。实际、有序、注重事实、逻辑清晰、负责任。',
@@ -145,11 +150,14 @@ function showMBTIResult() {
     'ENTJ': '坦率、果断，承担领导责任。迅速发现不合逻辑或低效的程序和政策，制定全面系统的解决方案。'
   };
 
+  // 存储性格描述，用于综合结果展示
+  mbti_description = personalityDescriptions[result] || '这是一个独特而有趣的性格组合。';
+
   document.getElementById('app').innerHTML = `
     <h2>你的MBTI性格类型是</h2>
     <div class="result-type">${result}</div>
     <div class="result">
-      <p>${personalityDescriptions[result] || '这是一个独特而有趣的性格组合。'}</p>
+      <p>${mbti_description}</p>
     </div>
     <button class="restart-btn" onclick="backToMain()">返回主页</button>
   `;
@@ -178,6 +186,8 @@ function showCareerResult() {
       <p>你的职业兴趣类型组合是：<strong>${scores[0].type}${scores[1].type}${scores[2].type}</strong>，以下是各项得分（从高到低）：</p>
       <div class="career-scores">
   `;
+
+  career_result = scores[0].type + scores[1].type + scores[2].type;
   
   // 添加每个类型的得分条形图
   scores.forEach(item => {
@@ -283,16 +293,231 @@ function getCareerSuggestions(primaryType, secondaryType) {
 
 // 返回主界面
 function backToMain() {
-  // 重置数据
-  resetTest();
+  // 重置数据(但保留测试结果)
+  resetCurrentTest();
   
   // 显示主界面，隐藏测试界面
   document.getElementById('main-screen').style.display = 'block';
   document.getElementById('app').style.display = 'none';
+  
+  // 检查是否两个测试都已完成，显示或隐藏综合分析按钮
+  checkAndShowCombinedButton();
 }
 
-// 重置测试
-function resetTest() {
+// 检查并显示综合分析按钮
+function checkAndShowCombinedButton() {
+  const combinedBtn = document.getElementById('combined-analysis-btn');
+  const completionStatus = document.getElementById('completion-status');
+  
+  if (mbti_result && career_result) {
+    // 两个测试都完成了
+    combinedBtn.style.display = 'block';
+    completionStatus.style.display = 'block';
+    document.getElementById('completed-tests-info').innerHTML = 
+      `<span class="completed-test mbti-completed">MBTI (${mbti_result})</span> 和 
+       <span class="completed-test career-completed">${career_result}</span>`;
+  } else if (mbti_result || career_result) {
+    // 只完成了一个测试
+    combinedBtn.style.display = 'none';
+    completionStatus.style.display = 'block';
+    let completedTest = '';
+    let pendingTest = '';
+    
+    if (mbti_result) {
+      completedTest = `<span class="completed-test mbti-completed">MBTI (${mbti_result})</span>`;
+      pendingTest = '<span class="pending-test">职业兴趣测试</span>';
+    } else {
+      completedTest = `<span class="completed-test career-completed">${career_result}</span>`;
+      pendingTest = '<span class="pending-test">MBTI测试</span>';
+    }
+    
+    document.getElementById('completed-tests-info').innerHTML = 
+      `已完成 ${completedTest}，还需完成 ${pendingTest} 才能查看综合分析`;
+  } else {
+    // 两个测试都没完成
+    combinedBtn.style.display = 'none';
+    completionStatus.style.display = 'none';
+  }
+}
+
+// 显示综合分析结果
+function showCombinedResult() {
+  // 隐藏主界面，显示测试界面
+  document.getElementById('main-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('app').className = 'card combined-theme';
+  
+  // 获取MBTI与RIASEC关联度分析
+  const mbtiCareerRelations = {
+    'ISTJ': { bestFit: ['C', 'R'], description: '你的性格注重细节和系统化，适合常规型和现实型职业。' },
+    'ISFJ': { bestFit: ['S', 'C'], description: '你的性格关心他人和具有组织性，适合社会型和常规型职业。' },
+    'INFJ': { bestFit: ['S', 'A'], description: '你的性格富有洞察力和创造性，适合社会型和艺术型职业。' },
+    'INTJ': { bestFit: ['I', 'E'], description: '你的性格注重战略和独立性，适合研究型和企业型职业。' },
+    'ISTP': { bestFit: ['R', 'I'], description: '你的性格务实和分析性强，适合现实型和研究型职业。' },
+    'ISFP': { bestFit: ['A', 'R'], description: '你的性格艺术性和实用性并重，适合艺术型和现实型职业。' },
+    'INFP': { bestFit: ['A', 'S'], description: '你的性格理想主义和富有同情心，适合艺术型和社会型职业。' },
+    'INTP': { bestFit: ['I', 'A'], description: '你的性格理论性和创新性强，适合研究型和艺术型职业。' },
+    'ESTP': { bestFit: ['E', 'R'], description: '你的性格注重行动和实用性，适合企业型和现实型职业。' },
+    'ESFP': { bestFit: ['S', 'E'], description: '你的性格社交性强和实用性，适合社会型和企业型职业。' },
+    'ENFP': { bestFit: ['S', 'A'], description: '你的性格热情和创造性，适合社会型和艺术型职业。' },
+    'ENTP': { bestFit: ['E', 'I'], description: '你的性格创新和分析性，适合企业型和研究型职业。' },
+    'ESTJ': { bestFit: ['E', 'C'], description: '你的性格注重组织和效率，适合企业型和常规型职业。' },
+    'ESFJ': { bestFit: ['S', 'E'], description: '你的性格注重和谐和责任感，适合社会型和企业型职业。' },
+    'ENFJ': { bestFit: ['S', 'E'], description: '你的性格关注他人成长和组织性，适合社会型和企业型职业。' },
+    'ENTJ': { bestFit: ['E', 'I'], description: '你的性格领导力强和战略性，适合企业型和研究型职业。' }
+  };
+  
+  // 获取MBTI关联信息
+  const mbtiInfo = mbtiCareerRelations[mbti_result] || { 
+    bestFit: [], 
+    description: '你的性格组合非常独特，可以考虑探索多种职业领域。' 
+  };
+  
+  // 解析职业兴趣类型
+  const careerTypes = career_result.split('');
+  
+  // 计算匹配度
+  const matchingTypes = mbtiInfo.bestFit.filter(type => careerTypes.includes(type));
+  const matchPercentage = matchingTypes.length > 0 
+    ? Math.round((matchingTypes.length / Math.min(mbtiInfo.bestFit.length, 2)) * 100) 
+    : 0;
+  
+  // 获取职业建议
+  const recommendations = getCombinedRecommendations(mbti_result, careerTypes[0], careerTypes[1]);
+  
+  // 构建结果HTML
+  let resultHTML = `
+    <h2>综合分析结果</h2>
+    <div class="combined-results">
+      <div class="combined-section">
+        <div class="combined-header">
+          <div class="combined-icon mbti-icon">MBTI</div>
+          <h3>性格类型: <span class="mbti-type">${mbti_result}</span></h3>
+        </div>
+        <p>${mbti_description}</p>
+      </div>
+      
+      <div class="combined-section">
+        <div class="combined-header">
+          <div class="combined-icon career-icon">RIASEC</div>
+          <h3>职业兴趣: <span class="career-type">${career_result}</span></h3>
+        </div>
+        <p>你的主导职业兴趣类型是 ${getTypeFullName(careerTypes[0])}，次要类型是 ${getTypeFullName(careerTypes[1])}。</p>
+      </div>
+      
+      <div class="combined-analysis">
+        <h3>性格与职业匹配分析</h3>
+        <div class="match-meter">
+          <div class="match-label">匹配度</div>
+          <div class="match-bar">
+            <div class="match-fill" style="width: ${matchPercentage}%"></div>
+          </div>
+          <div class="match-value">${matchPercentage}%</div>
+        </div>
+        <p class="match-description">${mbtiInfo.description}</p>
+        
+        <div class="match-details">
+          <p>基于你的MBTI性格类型(${mbti_result})，你可能适合${mbtiInfo.bestFit.map(t => getTypeFullName(t)).join('和')}相关的职业。</p>
+          <p>你的职业兴趣测试显示你偏好${careerTypes.slice(0, 3).map(t => getTypeFullName(t)).join('、')}类型的工作。</p>
+          ${matchingTypes.length > 0 ? 
+            `<p class="match-highlight">你的性格类型和职业兴趣在${matchingTypes.map(t => getTypeFullName(t)).join('、')}方面有很好的一致性。</p>` : 
+            `<p class="match-alert">你的性格类型和职业兴趣可能有一些差异，这提示你可能需要在工作中更注重平衡。</p>`}
+        </div>
+      </div>
+      
+      <div class="career-recommendations">
+        <h3>根据你的综合结果，推荐以下职业方向：</h3>
+        <ul class="recommendations-list">
+          ${recommendations.map(career => `<li>${career}</li>`).join('')}
+        </ul>
+        <p class="recommendation-note">这些推荐基于你的性格特点和职业兴趣的结合分析，但记住，最终的职业选择还应考虑你的个人价值观、能力和实际情况。</p>
+      </div>
+    </div>
+    <div class="combined-actions">
+      <button class="restart-btn" onclick="backToMain()">返回主页</button>
+      <button class="restart-btn secondary-btn" onclick="resetAllTests()">重新测试</button>
+    </div>
+  `;
+  
+  document.getElementById('app').innerHTML = resultHTML;
+}
+
+// 获取类型全称
+function getTypeFullName(typeCode) {
+  const typeNames = {
+    'R': '现实型(Realistic)',
+    'I': '研究型(Investigative)',
+    'A': '艺术型(Artistic)',
+    'S': '社会型(Social)',
+    'E': '企业型(Enterprising)',
+    'C': '常规型(Conventional)'
+  };
+  return typeNames[typeCode] || typeCode;
+}
+
+// 获取综合职业推荐
+function getCombinedRecommendations(mbtiType, primaryCareer, secondaryCareer) {
+  // 职业推荐数据库
+  const careerRecommendations = {
+    // 内向+现实型
+    'I_R': ['系统工程师', '质量控制工程师', '软件开发工程师', '环境科学家', '农业研究员'],
+    // 内向+研究型
+    'I_I': ['数据科学家', '研究员', '生物学家', '程序员', '统计学家', '医学研究员'],
+    // 内向+艺术型
+    'I_A': ['作家', '音乐制作人', '独立艺术家', '平面设计师', '网页设计师', '建筑师'],
+    // 内向+社会型
+    'I_S': ['咨询师', '图书馆员', '特殊教育教师', '社会工作者', '职业顾问'],
+    // 内向+企业型
+    'I_E': ['财务分析师', '市场研究分析师', '项目经理', '投资顾问', '战略规划师'],
+    // 内向+常规型
+    'I_C': ['会计', '数据分析师', '审计师', '税务专家', '研究助理', '行政专员'],
+    
+    // 外向+现实型
+    'E_R': ['土木工程师', '施工经理', '环保工程师', '体育教练', '农场经理'],
+    // 外向+研究型
+    'E_I': ['医生', '法医科学家', '高校教授', '经济学家', '科研机构负责人'],
+    // 外向+艺术型
+    'E_A': ['演员', '艺术总监', '广告创意总监', '游戏设计师', '媒体制作人'],
+    // 外向+社会型
+    'E_S': ['教师', '人力资源经理', '公共关系专员', '健康服务管理员', '社区组织者'],
+    // 外向+企业型
+    'E_E': ['市场营销经理', '销售总监', '企业家', '政治家', '房地产经纪人'],
+    // 外向+常规型
+    'E_C': ['行政经理', '运营经理', '物流主管', '客户服务主管', '办公室经理']
+  };
+  
+  // 确定E/I前缀
+  const prefix = mbtiType.charAt(0); // 获取MBTI的第一个字母(E或I)
+  
+  // 获取主要和次要职业推荐
+  const primaryKey = `${prefix}_${primaryCareer}`;
+  const secondaryKey = `${prefix}_${secondaryCareer}`;
+  
+  let recommendations = [];
+  
+  // 添加主要职业类型推荐
+  if (careerRecommendations[primaryKey]) {
+    recommendations = recommendations.concat(careerRecommendations[primaryKey].slice(0, 3));
+  }
+  
+  // 添加次要职业类型推荐
+  if (careerRecommendations[secondaryKey]) {
+    recommendations = recommendations.concat(careerRecommendations[secondaryKey].slice(0, 2));
+  }
+  
+  // 如果推荐不足，添加更多通用推荐
+  if (recommendations.length < 5) {
+    const generalRecommendations = [
+      '自由职业者', '顾问', '创业者', '内容创作者', '在线教育工作者'
+    ];
+    recommendations = recommendations.concat(generalRecommendations.slice(0, 5 - recommendations.length));
+  }
+  
+  return recommendations;
+}
+
+// 重置当前测试
+function resetCurrentTest() {
   // 重置分数
   Object.keys(mbtiScores).forEach(key => {
     mbtiScores[key] = 0;
@@ -314,13 +539,19 @@ function resetTest() {
     <p id="progress-text"></p>
     <div id="options" class="fade-in"></div>
   `;
-  
-  if (currentTest) {
-    loadQuestions(currentTest === 'mbti' ? 'mbti_questions.json' : 'career_questions.json');
-  }
+}
+
+// 重置所有测试
+function resetAllTests() {
+  mbti_result = "";
+  career_result = "";
+  mbti_description = "";
+  resetCurrentTest();
+  backToMain();
 }
 
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', function() {
-  // 不再自动加载问题，而是等待用户选择测试类型
+  // 检查是否两个测试都已完成
+  checkAndShowCombinedButton();
 });
