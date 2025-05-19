@@ -358,7 +358,7 @@ function findCharacteristics(mbti, holland) {
   return characteristics;
 }
 
-// 根据特质找出推荐专业
+// 修改函数findRecommendedMajors的返回部分的实现，不改变基本逻辑
 function findRecommendedMajors(characteristics, domainType) {
   const mapping = domainType === 'history' ? majors_traits_history : majors_traits_physics;
   const results = {};
@@ -386,7 +386,178 @@ function findRecommendedMajors(characteristics, domainType) {
   return sortedResults;
 }
 
-// 显示综合分析结果
+// 专业详情模拟数据库
+const majorDetails = {
+  // 文科专业
+  "汉语言文学": {
+    schools: ["北京大学", "复旦大学", "武汉大学", "南京大学", "中山大学"],
+    scores: {
+      "北京大学": "628分（2023年）",
+      "复旦大学": "615分（2023年）",
+      "武汉大学": "602分（2023年）",
+      "南京大学": "609分（2023年）",
+      "中山大学": "598分（2023年）"
+    },
+    ranking: "全国排名第2位，就业率85%",
+    description: "培养具有扎实的汉语言文学专业知识，能在高校、科研机构、出版机构、文化管理部门等从事教学、研究和管理工作的高级人才。"
+  },
+  "英语": {
+    schools: ["北京外国语大学", "上海外国语大学", "南京大学", "广东外语外贸大学", "西安外国语大学"],
+    scores: {
+      "北京外国语大学": "635分（2023年）",
+      "上海外国语大学": "622分（2023年）",
+      "南京大学": "610分（2023年）",
+      "广东外语外贸大学": "603分（2023年）",
+      "西安外国语大学": "588分（2023年）"
+    },
+    ranking: "全国排名第3位，就业率87%",
+    description: "培养具有扎实的英语语言基础，熟练的英语交流能力和丰富的文化知识，能在政府部门、教育、商贸、旅游等领域工作的高级外语人才。"
+  },
+  "法学": {
+    schools: ["中国政法大学", "北京大学", "清华大学", "中国人民大学", "华东政法大学"],
+    scores: {
+      "中国政法大学": "640分（2023年）",
+      "北京大学": "645分（2023年）",
+      "清华大学": "642分（2023年）",
+      "中国人民大学": "638分（2023年）",
+      "华东政法大学": "625分（2023年）"
+    },
+    ranking: "全国排名第1位，就业率88%",
+    description: "培养具有法学基本理论、基本知识和基本技能，能在国家机关、企事业单位、社会团体从事法律工作的高级专门人才。"
+  },
+  // 更多文科专业...
+  "会计学": {
+    schools: ["中国人民大学", "上海财经大学", "厦门大学", "中央财经大学", "东北财经大学"],
+    scores: {
+      "中国人民大学": "636分（2023年）",
+      "上海财经大学": "625分（2023年）",
+      "厦门大学": "618分（2023年）",
+      "中央财经大学": "620分（2023年）",
+      "东北财经大学": "605分（2023年）"
+    },
+    ranking: "全国排名第4位，就业率92%",
+    description: "培养掌握会计学、财务管理、审计学等方面知识，能在企事业单位从事会计、审计等财务工作的高级专门人才。"
+  },
+  
+  // 理工专业
+  "计算机科学与技术": {
+    schools: ["清华大学", "北京大学", "浙江大学", "上海交通大学", "南京大学"],
+    scores: {
+      "清华大学": "690分（2023年）",
+      "北京大学": "682分（2023年）",
+      "浙江大学": "678分（2023年）",
+      "上海交通大学": "675分（2023年）",
+      "南京大学": "670分（2023年）"
+    },
+    ranking: "全国排名第1位，就业率95%",
+    description: "培养具有计算机科学与技术的基本理论、基本知识和基本技能，能在科研部门、高科技企业等单位从事软件开发与研究的高级人才。"
+  },
+  "软件工程": {
+    schools: ["北京大学", "华中科技大学", "哈尔滨工业大学", "南京大学", "西安电子科技大学"],
+    scores: {
+      "北京大学": "675分（2023年）",
+      "华中科技大学": "658分（2023年）",
+      "哈尔滨工业大学": "655分（2023年）",
+      "南京大学": "665分（2023年）",
+      "西安电子科技大学": "645分（2023年）"
+    },
+    ranking: "全国排名第2位，就业率94%",
+    description: "培养具有软件工程专业知识与技能，能够从事软件开发、测试、部署和维护等工作的高级工程技术人才。"
+  },
+  "人工智能": {
+    schools: ["清华大学", "上海交通大学", "中国科学院大学", "哈尔滨工业大学", "西安交通大学"],
+    scores: {
+      "清华大学": "688分（2023年）",
+      "上海交通大学": "679分（2023年）",
+      "中国科学院大学": "675分（2023年）",
+      "哈尔滨工业大学": "665分（2023年）",
+      "西安交通大学": "662分（2023年）"
+    },
+    ranking: "全国排名第3位，就业率96%",
+    description: "培养具备人工智能核心理论知识，掌握先进的算法设计与实现能力，能够从事人工智能相关领域研究与应用的高级专门人才。"
+  }
+  // 可以继续添加更多专业...
+};
+
+// 默认专业详情（当没有对应数据时使用）
+const defaultMajorDetail = {
+  schools: ["北京大学", "清华大学", "复旦大学", "南京大学", "浙江大学"],
+  scores: {
+    "北京大学": "620-650分（2023年）",
+    "清华大学": "630-660分（2023年）",
+    "复旦大学": "610-640分（2023年）",
+    "南京大学": "600-630分（2023年）",
+    "浙江大学": "605-635分（2023年）"
+  },
+  ranking: "全国Top20专业",
+  description: "这是一个具有良好就业前景的专业，培养具备扎实理论基础和专业技能的高级人才。"
+};
+
+// 显示专业详情的函数
+function showMajorDetail(major, matchScore) {
+  // 获取专业详情，如果没有则使用默认值
+  const detail = majorDetails[major] || defaultMajorDetail;
+  
+  // 创建模态窗口
+  const modal = document.createElement('div');
+  modal.className = 'major-detail-modal';
+  
+  // 构建学校和分数线列表
+  let schoolsHtml = '<ul class="schools-list">';
+  detail.schools.forEach(school => {
+    const score = detail.scores[school] || "暂无数据";
+    schoolsHtml += `<li><span class="school-name">${school}</span> <span class="school-score">${score}</span></li>`;
+  });
+  schoolsHtml += '</ul>';
+  
+  // 构建模态窗口内容
+  modal.innerHTML = `
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>${major}</h3>
+        <span class="match-badge">${Math.round(matchScore * 100)}% 匹配度</span>
+        <button class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="detail-section">
+          <h4>专业排名</h4>
+          <p>${detail.ranking}</p>
+        </div>
+        <div class="detail-section">
+          <h4>专业介绍</h4>
+          <p>${detail.description}</p>
+        </div>
+        <div class="detail-section">
+          <h4>主要开设院校及分数线</h4>
+          ${schoolsHtml}
+        </div>
+      </div>
+    </div>
+  `;
+  
+  // 添加到页面
+  document.body.appendChild(modal);
+  
+  // 防止滚动
+  document.body.style.overflow = 'hidden';
+  
+  // 添加关闭事件
+  const closeBtn = modal.querySelector('.close-btn');
+  closeBtn.addEventListener('click', () => {
+    document.body.removeChild(modal);
+    document.body.style.overflow = '';
+  });
+  
+  // 点击模态窗口外部关闭
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      document.body.removeChild(modal);
+      document.body.style.overflow = '';
+    }
+  });
+}
+
+// 修改 showCombinedResult 函数中显示推荐专业的部分
 function showCombinedResult() {
   // 隐藏主界面，显示测试界面
   document.getElementById('main-screen').style.display = 'none';
@@ -483,7 +654,11 @@ function showCombinedResult() {
           <h4>文科类推荐专业</h4>
           <ul class="major-list">
             ${historyMajors.map(([major, score]) => 
-              `<li><span class="major-name">${major}</span> <span class="match-score">${Math.round(score * 100)}% 匹配</span></li>`
+              `<li>
+                <span class="major-name">${major}</span>
+                <span class="match-score">${Math.round(score * 100)}% 匹配</span>
+                <button class="major-detail-btn" onclick="showMajorDetail('${major}', ${score})">查看详情</button>
+              </li>`
             ).join('')}
           </ul>
         </div>
@@ -492,7 +667,11 @@ function showCombinedResult() {
           <h4>理工类推荐专业</h4>
           <ul class="major-list">
             ${physicsMajors.map(([major, score]) => 
-              `<li><span class="major-name">${major}</span> <span class="match-score">${Math.round(score * 100)}% 匹配</span></li>`
+              `<li>
+                <span class="major-name">${major}</span>
+                <span class="match-score">${Math.round(score * 100)}% 匹配</span>
+                <button class="major-detail-btn" onclick="showMajorDetail('${major}', ${score})">查看详情</button>
+              </li>`
             ).join('')}
           </ul>
         </div>

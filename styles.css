@@ -426,11 +426,14 @@ h2 {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .major-name {
   font-weight: 500;
   color: #374151;
+  flex: 1;
+  min-width: 120px;
 }
 
 .match-score {
@@ -448,76 +451,133 @@ h2 {
   transition: all 0.2s ease;
 }
 
-/* 特质标签组 */
-.characteristics-section {
-  margin-top: 20px;
+/* 专业列表中的详情按钮 */
+.major-detail-btn {
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 8px;
 }
 
-.characteristics-tags {
+.major-detail-btn:hover {
+  background-color: #4338ca;
+  transform: translateY(-1px);
+}
+
+/* 专业详情模态窗口 */
+.major-detail-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
 }
 
-.characteristic-tag {
-  background-color: #f9fafb;
-  border: 1px solid #e5e7eb;
-  padding: 5px 12px;
+.modal-content {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease;
+}
+
+.modal-header {
+  padding: 15px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  background-color: white;
+  border-radius: 12px 12px 0 0;
+  z-index: 1;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #4f46e5;
+  font-size: 1.5rem;
+}
+
+.match-badge {
+  background-color: #d1fae5;
+  color: #065f46;
+  padding: 5px 10px;
   border-radius: 20px;
   font-size: 14px;
+  font-weight: 600;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #9ca3af;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.close-btn:hover {
   color: #4b5563;
 }
 
-.characteristic-tag.matched {
-  background-color: #d1fae5;
-  border-color: #a7f3d0;
-  color: #065f46;
+.modal-body {
+  padding: 20px;
 }
 
-@media (max-width: 768px) {
-  .test-selection {
-    flex-direction: column;
-  }
-  
-  .career-score-item {
-    flex-wrap: wrap;
-  }
-  
-  .career-score-label {
-    width: 100%;
-    text-align: left;
-    margin-bottom: 5px;
-  }
-  
-  .career-description {
-    margin-left: 0;
-  }
-  
-  .combined-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .combined-icon {
-    margin-bottom: 10px;
-  }
-  
-  .combined-actions {
-    flex-direction: column;
-  }
-  
-  .recommendations-list {
-    flex-direction: column;
-  }
-  
-  .recommendations-list li {
-    margin-bottom: 10px;
-  }
-  
-  .major-list {
-    grid-template-columns: 1fr;
-  }
+.detail-section {
+  margin-bottom: 20px;
+}
+
+.detail-section h4 {
+  margin: 0 0 10px 0;
+  color: #4b5563;
+  font-size: 1.1rem;
+  border-left: 3px solid #4f46e5;
+  padding-left: 10px;
+}
+
+.schools-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.schools-list li {
+  padding: 10px 15px;
+  border-bottom: 1px solid #f3f4f6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.schools-list li:last-child {
+  border-bottom: none;
+}
+
+.school-name {
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.school-score {
+  color: #6b7280;
+  font-size: 14px;
 }
 
 /* 动画效果 */
@@ -528,6 +588,17 @@ h2 {
 
 .fade-in {
   animation: fadeIn 0.5s ease forwards;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* 问题类别样式 */
@@ -609,4 +680,74 @@ h2 {
   font-size: 14px;
   color: #6b7280;
   line-height: 1.4;
+}
+
+/* 移动端适配 */
+@media (max-width: 640px) {
+  .modal-content {
+    width: 95%;
+    max-height: 90vh;
+  }
+  
+  .modal-header {
+    flex-wrap: wrap;
+  }
+  
+  .match-badge {
+    margin-top: 8px;
+  }
+  
+  .schools-list li {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .school-score {
+    margin-top: 5px;
+  }
+}
+
+@media (max-width: 768px) {
+  .test-selection {
+    flex-direction: column;
+  }
+  
+  .career-score-item {
+    flex-wrap: wrap;
+  }
+  
+  .career-score-label {
+    width: 100%;
+    text-align: left;
+    margin-bottom: 5px;
+  }
+  
+  .career-description {
+    margin-left: 0;
+  }
+  
+  .combined-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .combined-icon {
+    margin-bottom: 10px;
+  }
+  
+  .combined-actions {
+    flex-direction: column;
+  }
+  
+  .recommendations-list {
+    flex-direction: column;
+  }
+  
+  .recommendations-list li {
+    margin-bottom: 10px;
+  }
+  
+  .major-list {
+    grid-template-columns: 1fr;
+  }
 }
