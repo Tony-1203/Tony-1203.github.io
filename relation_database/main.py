@@ -2,9 +2,7 @@ import pandas as pd
 from history.majors_traits_history import majors_traits_history
 from physics.majors_traits_physics import majors_traits_physics
 
-df = pd.read_excel(
-    "/Users/tony/Desktop/program/code/relation_database/relation.xlsx", header=0
-)
+df = pd.read_excel("relations.xlsx", header=0)
 
 personality_keywords = {}
 
@@ -34,6 +32,7 @@ for _, row in df.iterrows():
 #     print(f"已生成Python字典文件: {output_file}")
 
 # generate_python_file(personality_keywords, "personality_keywords.py")
+
 
 def find_characteristics(mbti, holland, choice):
     characteristics = set()  # 改为使用集合而不是列表
@@ -84,14 +83,19 @@ def find_career(chacteristics, choice):
 
 def main():
     mbti = input("请输入您的MBTI类型（如ENFJ）：")
+    # mbti = "ENFJ"
     holland = input("请输入您的Holland类型（如IRA）：")
+    # holland = "IRA"
     choice = input("请输入您选择的专业领域（history/physics）：")
+    # choice = "physics"
 
     characteristics = find_characteristics(mbti, holland, choice)
     print(f"根据您的MBTI和Holland类型，推荐的特质有：{characteristics}")
+    # print(len(characteristics))
 
     top_majors = find_career(characteristics, choice)
     print(f"根据您的特质，推荐的专业有：{top_majors}")
+    # print(len(majors_traits_physics))
 
 
 if __name__ == "__main__":
