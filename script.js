@@ -10,6 +10,7 @@ let currentTest = ""; // 当前测试类型: "mbti" 或 "career"
 let mbti_result = "";
 let career_result = "";
 let mbti_description = ""; // 存储MBTI测试的性格描述
+let selectedDomain = ""; // 新增：存储用户选择的学科方向
 
 // 选择测试类型
 function selectTest(testType) {
@@ -374,14 +375,20 @@ function findRecommendedMajors(characteristics, domainType) {
     });
     
     // 计算匹配比例
-    const ratio = matchCount / traits.length;
-    results[major] = ratio;
+    const ratio = traits.length > 0 ? matchCount / traits.length : 0; // Avoid division by zero
+    results[major] = { matchCount: matchCount, ratio: ratio };
   }
   
-  // 按匹配比例从高到低排序
+  // 按匹配数量从高到低排序，如果匹配数量相同，则按匹配比例从高到低排序
   const sortedResults = Object.entries(results)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 10); // 只取前10个专业
+    .sort(([, aData], [, bData]) => {
+      if (bData.matchCount !== aData.matchCount) {
+        return bData.matchCount - aData.matchCount;
+      }
+      return bData.ratio - aData.ratio; // Secondary sort by ratio
+    })
+    .slice(0, 10) // 只取前10个专业
+    .map(([major, data]) => [major, data.ratio]); // 返回 [major, ratio] 格式
   
   return sortedResults;
 }
@@ -389,7 +396,8 @@ function findRecommendedMajors(characteristics, domainType) {
 // 显示专业详情的函数
 function showMajorDetail(major, matchScore) {
   // 获取专业详情，如果没有则使用默认值
-  const detail = majorDetails[major] || defaultMajorDetail;
+  const domainSpecificDetails = selectedDomain === 'history' ? majorDetailsHistory : majorDetailsPhysics;
+  const detail = domainSpecificDetails[major] || defaultMajorDetail;
   
   // 创建模态窗口
   const modal = document.createElement('div');
@@ -487,13 +495,33 @@ function showMajorDetail(major, matchScore) {
   });
 }
 
-// 修改 showCombinedResult 函数中显示推荐专业的部分
+// 修改 showCombinedResult 函数，用于显示学科方向选择
 function showCombinedResult() {
   // 隐藏主界面，显示测试界面
   document.getElementById('main-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
-  document.getElementById('app').className = 'card combined-theme';
-  
+  document.getElementById('app').className = 'card'; // 使用通用卡片样式
+
+  let selectionHTML = `
+    <h2>请选择你的学科方向</h2>
+    <p>根据你的方向，我们将为你推荐相应类别的专业。</p>
+    <div class="domain-selection" style="margin-top: 20px; margin-bottom: 20px;">
+      <button class="option-btn" onclick="generateCombinedReport('history')">历史方向</button>
+      <button class="option-btn" onclick="generateCombinedReport('physics')">物理方向</button>
+    </div>
+    <button class="restart-btn secondary-btn" onclick="backToMain()">返回主页</button>
+  `;
+  document.getElementById('app').innerHTML = selectionHTML;
+}
+
+// 新增函数：根据选择的学科方向生成综合报告
+function generateCombinedReport(domain) {
+  selectedDomain = domain; // 保存选择的方向
+
+  const appDiv = document.getElementById('app');
+  appDiv.innerHTML = ''; // 清空旧内容
+  appDiv.className = 'card combined-theme'; // 应用综合报告主题
+
   // 获取MBTI与RIASEC关联度分析
   const mbtiCareerRelations = {
     'ISTJ': { bestFit: ['C', 'R'], description: '你的性格注重细节和系统化，适合常规型和现实型职业。' },
@@ -514,32 +542,55 @@ function showCombinedResult() {
     'ENTJ': { bestFit: ['E', 'I'], description: '你的性格领导力强和战略性，适合企业型和研究型职业。' }
   };
   
-  // 获取MBTI关联信息
   const mbtiInfo = mbtiCareerRelations[mbti_result] || { 
     bestFit: [], 
     description: '你的性格组合非常独特，可以考虑探索多种职业领域。' 
   };
   
-  // 解析职业兴趣类型
   const careerTypes = career_result.split('');
   
-  // 计算匹配度
   const matchingTypes = mbtiInfo.bestFit.filter(type => careerTypes.includes(type));
   const matchPercentage = matchingTypes.length > 0 
     ? Math.round((matchingTypes.length / Math.min(mbtiInfo.bestFit.length, 2)) * 100) 
     : 0;
   
-  // 使用特质和推荐逻辑计算推荐专业
   const characteristics = findCharacteristics(mbti_result, careerTypes);
-  const historyMajors = findRecommendedMajors(characteristics, 'history');
-  const physicsMajors = findRecommendedMajors(characteristics, 'physics');
   
-  // 获取职业建议
+  let recommendedMajorsHTML = '';
+  let majorSectionTitle = '';
+
+  if (selectedDomain === 'history') {
+    const historyMajors = findRecommendedMajors(characteristics, 'history');
+    majorSectionTitle = '历史方向推荐专业';
+    recommendedMajorsHTML = `
+      <ul class="major-list">
+        ${historyMajors.map(([major, score]) => 
+          `<li>
+            <span class="major-name">${major}</span>
+            <span class="match-score">${Math.round(score * 100)}% 匹配</span>
+            <button class="major-detail-btn" onclick="showMajorDetail('${major}', ${score})">查看详情</button>
+          </li>`
+        ).join('')}
+      </ul>`;
+  } else if (selectedDomain === 'physics') {
+    const physicsMajors = findRecommendedMajors(characteristics, 'physics');
+    majorSectionTitle = '物理方向推荐专业';
+    recommendedMajorsHTML = `
+      <ul class="major-list">
+        ${physicsMajors.map(([major, score]) => 
+          `<li>
+            <span class="major-name">${major}</span>
+            <span class="match-score">${Math.round(score * 100)}% 匹配</span>
+            <button class="major-detail-btn" onclick="showMajorDetail('${major}', ${score})">查看详情</button>
+          </li>`
+        ).join('')}
+      </ul>`;
+  }
+
   const recommendations = getCombinedRecommendations(mbti_result, careerTypes[0], careerTypes[1]);
   
-
   let resultHTML = `
-    <h2>综合分析结果</h2>
+    <h2>综合分析结果 (${selectedDomain === 'history' ? '历史方向' : '物理方向'})</h2>
     <div class="combined-results">
       <div class="combined-section">
         <div class="combined-header">
@@ -579,33 +630,10 @@ function showCombinedResult() {
       
       <div class="recommended-majors">
         <h3>推荐专业</h3>
-        
         <div class="major-section">
-          <h4>文科类推荐专业</h4>
-          <ul class="major-list">
-            ${historyMajors.map(([major, score]) => 
-              `<li>
-                <span class="major-name">${major}</span>
-                <span class="match-score">${Math.round(score * 100)}% 匹配</span>
-                <button class="major-detail-btn" onclick="showMajorDetail('${major}', ${score})">查看详情</button>
-              </li>`
-            ).join('')}
-          </ul>
+          <h4>${majorSectionTitle}</h4>
+          ${recommendedMajorsHTML}
         </div>
-        
-        <div class="major-section">
-          <h4>理工类推荐专业</h4>
-          <ul class="major-list">
-            ${physicsMajors.map(([major, score]) => 
-              `<li>
-                <span class="major-name">${major}</span>
-                <span class="match-score">${Math.round(score * 100)}% 匹配</span>
-                <button class="major-detail-btn" onclick="showMajorDetail('${major}', ${score})">查看详情</button>
-              </li>`
-            ).join('')}
-          </ul>
-        </div>
-        
         <p class="recommendation-note">专业推荐基于你的MBTI性格类型和Holland职业兴趣类型的特质匹配度计算。匹配度越高，表示该专业所需的特质与你的特质越符合。</p>
       </div>
       
@@ -620,10 +648,11 @@ function showCombinedResult() {
     <div class="combined-actions">
       <button class="restart-btn" onclick="backToMain()">返回主页</button>
       <button class="restart-btn secondary-btn" onclick="resetAllTests()">重新测试</button>
+      <button class="restart-btn secondary-btn" onclick="showCombinedResult()">重新选择方向</button>
     </div>
   `;
   
-  document.getElementById('app').innerHTML = resultHTML;
+  appDiv.innerHTML = resultHTML;
 }
 
 // 获取类型全称

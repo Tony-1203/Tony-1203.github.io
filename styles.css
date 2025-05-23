@@ -682,6 +682,15 @@ h2 {
   line-height: 1.4;
 }
 
+/* 新增：学科偏向选择容器样式 */
+.domain-selection {
+  display: flex;
+  flex-direction: column; /* 使按钮垂直排列 */
+  gap: 15px; /* 按钮之间的间距 */
+  align-items: center; /* 使按钮居中 */
+  margin-bottom: 20px;
+}
+
 /* 年份选择器样式 */
 .year-selector {
   margin-bottom: 15px;
