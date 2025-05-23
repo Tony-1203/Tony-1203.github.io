@@ -16,27 +16,94 @@ let selectedDomain = ""; // 新增：存储用户选择的学科方向
 function selectTest(testType) {
   // 隐藏主界面，显示测试界面
   document.getElementById('main-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  
-  // 设置当前测试类型
+  const appDiv = document.getElementById('app');
+  appDiv.style.display = 'block';
+  appDiv.innerHTML = ''; // 清空先前的内容，包括任何介绍文本
+
   currentTest = testType;
   
-  // 根据测试类型加载不同的题库和计分系统
-  if (testType === 'mbti') {
-    // MBTI测试
-    document.getElementById('app').className = 'card mbti-theme';
-    currentScores = mbtiScores;
-    loadQuestions('mbti_questions.json');
-  } else if (testType === 'career') {
-    // 职业兴趣测试
-    document.getElementById('app').className = 'card career-theme';
-    currentScores = careerScores;
-    loadQuestions('career_questions.json');
-  }
-  
-  // 重置其他状态
+  // 重置通用状态，确保每次测试开始时都是干净的
   current = 0;
   currentCategory = "";
+
+  if (testType === 'mbti') {
+    appDiv.className = 'card mbti-theme';
+    // 为MBTI测试显示介绍界面
+    appDiv.innerHTML = `
+      <div class="test-introduction-container" style="padding: 20px; max-width: 600px; margin: 0 auto; text-align: left;">
+        <h2 style="text-align: center;">MBTI测试前须知</h2>
+        <p style="font-size: 16px; line-height: 1.7; color: #333; margin-bottom: 15px;">
+          1、参加测试的人员请务必诚实、独立地回答问题，只有如此，才能得到有效的结果。
+        </p>
+        <p style="font-size: 16px; line-height: 1.7; color: #333; margin-bottom: 15px;">
+          2、《性格分析报告》展示的是你的性格倾向，而不是你的知识、技能、经验。
+        </p>
+        <p style="font-size: 16px; line-height: 1.7; color: #333; margin-bottom: 15px;">
+          3、MBTI提供的性格类型描述仅供测试者确定自己的性格类型之用，性格类型没有好坏，只有不同。
+          每一种性格特征都有其价值和优点，也有缺点和需要注意的地方。清楚地了解自己的性格优劣势，有利于更好地发挥自己的特长，
+          而尽可能的在为人处事中避免自己性格中的劣势，更好地和他人相处，更好地作重要的决策。
+        </p>
+        <p style="font-size: 16px; line-height: 1.7; color: #333; margin-bottom: 25px;">
+          4、本测试分为四部分，共93题。所有题目没有对错之分，请根据自己的实际情况选择。<br>
+        </p>
+        <p style="font-size: 16px; line-height: 1.7; color: #333; margin-bottom: 25px;">
+          只要你是认真、真实地填写了测试问卷，那么通常情况下你都能得到一个确实和你的性格相匹配的类型。
+          希望你能从中或多或少地获得一些有益的信息。<br>
+        </p>
+
+        <div style="display: flex; flex-direction: column; align-items: center;">
+          <button class="option-btn" id="start-mbti-test-btn" style="width: 60%; margin-bottom:10px;">开始测试</button>
+          <button class="restart-btn secondary-btn" onclick="backToMain()" style="width: 60%;">返回主页</button>
+        </div>
+      </div>
+    `;
+    document.getElementById('start-mbti-test-btn').onclick = () => {
+      currentScores = mbtiScores;
+      // 为MBTI测试初始化问题加载UI
+      appDiv.innerHTML = `
+        <h3 id="category" class="question-category"></h3>
+        <h2 id="question">加载中...</h2>
+        <div class="progress-container">
+          <div id="progress-bar" class="progress-bar"></div>
+        </div>
+        <p id="progress-text"></p>
+        <div id="options" class="fade-in"></div>
+      `;
+      loadQuestions('mbti_questions.json');
+    }
+  } else if (testType === 'career') {
+    appDiv.className = 'card career-theme';
+    // 为职业兴趣测试显示介绍界面
+    appDiv.innerHTML = `
+      <div class="test-introduction-container" style="padding: 20px; max-width: 600px; margin: 0 auto; text-align: left;">
+        <h2 style="text-align: center;">霍兰德职业兴趣测试说明</h2>
+        <p style="font-size: 16px; line-height: 1.7; color: #333; margin-bottom: 25px; text-indent: 2em;">
+          本问卷共90道题目，每道题目是一个陈述。请您根据自己的真实情况对这些陈述进行评价，如果符合实际情况就在相应的题目选择“是”，否则选择“否”。
+        </p>
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: center;">
+        <button class="option-btn" id="start-career-test-btn" style="width: 60%; margin-bottom:10px;">开始测试</button>
+        <button class="restart-btn secondary-btn" onclick="backToMain()" style="width: 60%;">返回主页</button>
+      </div>
+    `;
+
+    document.getElementById('start-career-test-btn').onclick = () => {
+      currentScores = careerScores;
+      current = 0; // 确保从第一个问题开始
+      currentCategory = ""; // 重置类别
+      // 初始化问题加载UI
+      appDiv.innerHTML = `
+        <h3 id="category" class="question-category"></h3>
+        <h2 id="question">加载中...</h2>
+        <div class="progress-container">
+          <div id="progress-bar" class="progress-bar"></div>
+        </div>
+        <p id="progress-text"></p>
+        <div id="options" class="fade-in"></div>
+      `;
+      loadQuestions('career_questions.json');
+    };
+  }
 }
 
 // 加载题库
@@ -437,12 +504,10 @@ function showMajorDetail(major, matchScore) {
     return schoolsHtml;
   }
   
-  // 构建模态窗口内容
   modal.innerHTML = `
     <div class="modal-content">
       <div class="modal-header">
         <h3>${major}</h3>
-        <span class="match-badge">${Math.round(matchScore * 100)}% 匹配度</span>
         <button class="close-btn">&times;</button>
       </div>
       <div class="modal-body">
@@ -460,6 +525,7 @@ function showMajorDetail(major, matchScore) {
       </div>
     </div>
   `;
+
   
   // 添加到页面
   document.body.appendChild(modal);
@@ -567,7 +633,6 @@ function generateCombinedReport(domain) {
         ${historyMajors.map(([major, score]) => 
           `<li>
             <span class="major-name">${major}</span>
-            <span class="match-score">${Math.round(score * 100)}% 匹配</span>
             <button class="major-detail-btn" onclick="showMajorDetail('${major}', ${score})">查看详情</button>
           </li>`
         ).join('')}
@@ -580,12 +645,12 @@ function generateCombinedReport(domain) {
         ${physicsMajors.map(([major, score]) => 
           `<li>
             <span class="major-name">${major}</span>
-            <span class="match-score">${Math.round(score * 100)}% 匹配</span>
             <button class="major-detail-btn" onclick="showMajorDetail('${major}', ${score})">查看详情</button>
           </li>`
         ).join('')}
       </ul>`;
   }
+
 
   const recommendations = getCombinedRecommendations(mbti_result, careerTypes[0], careerTypes[1]);
   
