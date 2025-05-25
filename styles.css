@@ -796,13 +796,11 @@ h2 {
 
 .footer-version {
   position: fixed;
-  bottom: 10px;
-  left: 0;
-  width: 100%;
-  text-align: center;
+  right: 20px;
+  bottom: 20px;
   color: #888;
   font-size: 14px;
   z-index: 999;
-  pointer-events: none;
   background: transparent;
+  pointer-events: none;
 }
