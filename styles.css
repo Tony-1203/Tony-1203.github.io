@@ -793,3 +793,16 @@ h2 {
     grid-template-columns: 1fr;
   }
 }
+
+.footer-version {
+  position: fixed;
+  bottom: 10px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  color: #888;
+  font-size: 14px;
+  z-index: 999;
+  pointer-events: none;
+  background: transparent;
+}
