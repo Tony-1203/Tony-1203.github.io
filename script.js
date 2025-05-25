@@ -494,14 +494,14 @@ function showMajorDetail(major, matchScore) {
   
   // 构建学校和分数线列表的初始显示
   function buildSchoolsList(year) {
-    const yearScores = getScoresByYear(year);
-    let schoolsHtml = '<ul class="schools-list">';
-    detail.schools.forEach(school => {
-      const score = yearScores[school] || "暂无数据";
-      schoolsHtml += `<li><span class="school-name">${school}</span> <span class="school-score">${score}</span></li>`;
-    });
-    schoolsHtml += '</ul>';
-    return schoolsHtml;
+      const yearScores = getScoresByYear(year);
+      let schoolsHtml = '<ul class="schools-list">';
+      // 直接遍历 yearScores 的键值对，顺序就是 yearScores 的插入顺序
+      Object.entries(yearScores).forEach(([school, score]) => {
+          schoolsHtml += `<li><span class="school-name">${school}</span> <span class="school-score">${score}</span></li>`;
+      });
+      schoolsHtml += '</ul>';
+      return schoolsHtml;
   }
   
   modal.innerHTML = `
