@@ -810,7 +810,7 @@ function predictAdmissionProbability(detail, userRank) {
     const prob_a = parseFloat(a.probability.toFixed(2));
     const prob_b = parseFloat(b.probability.toFixed(2));
 
-    if (prob_b !== prob_a) {
+    if (prob_b - prob_a > 0.1) {
       return prob_b - prob_a; // 概率高的在前
     }
     // 概率相同，比较平均位次 mu，mu 小的（排名靠前的）在前
