@@ -537,6 +537,9 @@ function showMajorDetail(major, matchScore) {
   });
   yearSelectorHtml += '</div>';
   
+  // 添加预测概率按钮
+  yearSelectorHtml += `<button id="predict-probability-btn" class="predict-btn">预测概率</button>`;
+  
   // 构建学校和分数线列表的初始显示
   function buildSchoolsList(year) {
       const yearScores = getScoresByYear(year);
@@ -562,9 +565,16 @@ function showMajorDetail(major, matchScore) {
         </div>
         <div class="detail-section">
           <h4>主要开设院校及分数线</h4>
-          ${yearSelectorHtml}
+          <div class="year-control-panel">
+            ${yearSelectorHtml}
+          </div>
           <div id="schools-data">
             ${buildSchoolsList(currentYear)}
+          </div>
+          <div id="probability-results" class="probability-results" style="display: none;">
+            <h4>录取概率预测结果</h4>
+            <p class="prediction-note">注：预测结果仅供参考，实际录取情况受多种因素影响。</p>
+            <ul id="probability-list" class="probability-list"></ul>
           </div>
         </div>
       </div>
@@ -601,9 +611,237 @@ function showMajorDetail(major, matchScore) {
         currentYear = e.target.value;
         const schoolsDataContainer = modal.querySelector('#schools-data');
         schoolsDataContainer.innerHTML = buildSchoolsList(currentYear);
+        // 隐藏概率预测结果
+        document.getElementById('probability-results').style.display = 'none';
       }
     });
   });
+  
+  // 添加预测概率按钮事件
+  const predictBtn = modal.querySelector('#predict-probability-btn');
+  predictBtn.addEventListener('click', () => {
+    // 使用自定义输入框获取用户的高考位次
+    showCustomPrompt("请输入您的高考位次", (userRank) => {
+      if (userRank === null) return; // 用户取消输入
+
+      // 验证输入
+      const rank = parseInt(userRank);
+      if (isNaN(rank) || rank <= 0 || rank > 1000000) {
+        alert("请输入有效的高考位次（1-1000000之间的数字）");
+        return;
+      }
+      
+      // 预测各学校的录取概率
+      predictAdmissionProbability(detail, rank);
+    });
+  });
+}
+
+// 新增：显示自定义输入模态框的函数
+function showCustomPrompt(message, callback) {
+  const promptModal = document.createElement('div');
+  promptModal.className = 'custom-prompt-modal';
+  promptModal.innerHTML = `
+    <div class="custom-prompt-content">
+      <p>${message}</p>
+      <input type="number" id="custom-prompt-input" min="1" max="50000" placeholder="在此输入位次">
+      <div class="custom-prompt-actions">
+        <button id="custom-prompt-ok" class="custom-prompt-btn">确定</button>
+        <button id="custom-prompt-cancel" class="custom-prompt-btn cancel">取消</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(promptModal);
+  document.body.style.overflow = 'hidden'; // 防止背景滚动
+
+  // Trigger reflow to ensure transition is applied
+  void promptModal.offsetWidth; 
+
+  // Add class for fade-in effect
+  promptModal.classList.add('fade-in-prompt');
+
+
+  const inputField = promptModal.querySelector('#custom-prompt-input');
+  inputField.focus(); // 自动聚焦到输入框
+
+  const okButton = promptModal.querySelector('#custom-prompt-ok');
+  const cancelButton = promptModal.querySelector('#custom-prompt-cancel');
+
+  const closePrompt = (value) => {
+    // Add class for fade-out effect
+    promptModal.classList.remove('fade-in-prompt');
+    promptModal.classList.add('fade-out-prompt');
+
+    // Wait for animation to complete before removing
+    setTimeout(() => {
+      if (document.body.contains(promptModal)) {
+        document.body.removeChild(promptModal);
+      }
+      document.body.style.overflow = '';
+      callback(value);
+    }, 300); // Match CSS transition duration
+  };
+
+  okButton.addEventListener('click', () => {
+    closePrompt(inputField.value);
+  });
+
+  cancelButton.addEventListener('click', () => {
+    closePrompt(null); // 用户取消
+  });
+
+  // 允许回车键提交
+  inputField.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      okButton.click();
+    }
+  });
+
+  promptModal.addEventListener('click', (e) => {
+    if (e.target === promptModal) {
+      closePrompt(null);
+    }
+  });
+}
+
+
+function predictAdmissionProbability(detail, userRank) {
+  const probResults = document.getElementById('probability-results');
+  const probList = document.getElementById('probability-list');
+  
+  // 清空旧结果
+  probList.innerHTML = '';
+  
+  // 准备学校和历年分数线数据
+  const schoolProbabilities = [];
+  const scores = detail.scores;
+  
+  // 遍历每个学校
+  for (const school of Object.keys(scores[Object.keys(scores)[0]] || {})) {
+    // 获取该学校在各年的分数线（位次）
+    const schoolRanks = [];
+    for (const year of Object.keys(scores).sort()) {
+      if (scores[year][school]) {
+        schoolRanks.push(parseInt(scores[year][school]));
+      }
+    }
+    if (selectedDomain === 'history') {
+      const yearToScoreRank = {
+        2023: score_rank_2023history,
+        2022: score_rank_2022history,
+        2021: score_rank_2021history
+      };
+
+      const sortedYears = Object.keys(scores).sort();
+
+      for (let i = 0; i < schoolRanks.length; i++) {
+        const year = sortedYears[i];
+        const score = schoolRanks[i];
+        if (isNaN(score)) continue;
+
+        const scoreRankMap = yearToScoreRank[year];
+        if (!scoreRankMap) continue;
+
+        // 尝试精确获取该分数的排名
+        const rank = scoreRankMap[score];
+        if (rank !== undefined) {
+          schoolRanks[i] = rank;
+        } else {
+          // 如果没有匹配，使用该年份 rank 表中的第一个值
+          const firstRank = Object.values(scoreRankMap)[0];
+          schoolRanks[i] = firstRank;
+        }
+      }
+    }
+    else if (selectedDomain === 'physics') {
+      const yearToScoreRank = {
+        2023: score_rank_2023physics,
+        2022: score_rank_2022physics,
+        2021: score_rank_2021physics
+    };
+
+    const sortedYears = Object.keys(scores).sort();
+
+    for (let i = 0; i < schoolRanks.length; i++) {
+      const year = sortedYears[i];
+      const score = schoolRanks[i];
+      if (isNaN(score)) continue;
+
+      const scoreRankMap = yearToScoreRank[year];
+      if (!scoreRankMap) continue;
+
+      // 尝试精确获取该分数的排名
+      const rank = scoreRankMap[score];
+      if (rank !== undefined) {
+        schoolRanks[i] = rank;
+      } else {
+        // 如果没有匹配，使用该年份 rank 表中的第一个值
+        const firstRank = Object.values(scoreRankMap)[0];
+        schoolRanks[i] = firstRank;
+      }
+    }
+  }
+    // 如果有历年数据，计算录取概率
+    if (schoolRanks.length > 0) {
+      let probability, mu, sigma;
+      try {
+        // 使用predict.js中的函数预测概率
+        const result = estimateProbGeneral(schoolRanks, userRank);
+        probability = result.probability;
+        mu = result.mu;
+        sigma = result.sigma;
+        
+        schoolProbabilities.push({
+          school,
+          probability: probability * 100, // 转换为百分比
+          mu, // mu 代表平均位次，数值越小排名越靠前
+          sigma,
+          ranks: schoolRanks.join(', ')
+        });
+      } catch (error) {
+        console.error(`计算${school}录取概率时出错:`, error);
+      }
+    }
+  }
+  
+  // 按概率从高到低排序，如果概率相同（保留两位小数后），则按平均位次 mu 从小到大排序（mu越小越好）
+  schoolProbabilities.sort((a, b) => {
+    const prob_a = parseFloat(a.probability.toFixed(2));
+    const prob_b = parseFloat(b.probability.toFixed(2));
+
+    if (prob_b !== prob_a) {
+      return prob_b - prob_a; // 概率高的在前
+    }
+    // 概率相同，比较平均位次 mu，mu 小的（排名靠前的）在前
+    return a.mu - b.mu;
+  });
+  
+  // 显示预测结果
+  for (const item of schoolProbabilities) {
+    const probabilityClass = getProbabilityClass(item.probability);
+
+    probList.innerHTML += `
+      <li class="${probabilityClass}">
+        <span class="school-name">${item.school}</span>
+        <span class="probability-value">${item.probability.toFixed(2)}%</span>
+        <span class="probability-detail">
+          位次均值≈${Math.round(item.mu)}，标准差≈${Math.round(item.sigma)}，历年位次：${item.ranks.split(', ').reverse().join(', ')}
+        </span>
+      </li>
+    `;
+  }
+  
+  // 显示结果区域
+  probResults.style.display = 'block';
+}
+
+// 根据概率值获取对应的CSS类
+function getProbabilityClass(probability) {
+  if (probability >= 80) return 'high-probability';
+  if (probability >= 50) return 'medium-probability';
+  if (probability >= 20) return 'low-probability';
+  return 'very-low-probability';
 }
 
 // 修改 showCombinedResult 函数，用于显示学科方向选择

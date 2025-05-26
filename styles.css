@@ -724,6 +724,114 @@ h2 {
   color: #4f46e5;
 }
 
+/* 预测概率按钮样式 */
+.year-control-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.predict-btn {
+  padding: 8px 18px;
+  background-color: #4f46e5;
+  flex-wrap: wrap;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 500;
+  margin-bottom: 15px;
+}
+
+.predict-btn:hover {
+  background-color: #4338ca;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* 概率预测结果样式 */
+.probability-results {
+  margin-top: 25px;
+  padding-top: 15px;
+  border-top: 1px dashed #e5e7eb;
+}
+
+.prediction-note {
+  font-style: italic;
+  color: #6b7280;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+.probability-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.probability-list li {
+  padding: 10px 15px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.probability-value {
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+  color: white;
+}
+
+.probability-detail {
+  color: #6b7280;
+  font-size: 14px;
+  flex-basis: 100%;
+  margin-top: 5px;
+}
+
+/* 概率等级样式 */
+.high-probability {
+  background-color: #ecfdf5;
+  border-left: 3px solid #10b981;
+}
+
+.high-probability .probability-value {
+  background-color: #10b981;
+}
+
+.medium-probability {
+  background-color: #fffbeb;
+  border-left: 3px solid #f59e0b;
+}
+
+.medium-probability .probability-value {
+  background-color: #f59e0b;
+}
+
+.low-probability {
+  background-color: #fff7ed;
+  border-left: 3px solid #f97316;
+}
+
+.low-probability .probability-value {
+  background-color: #f97316;
+}
+
+.very-low-probability {
+  background-color: #fef2f2;
+  border-left: 3px solid #ef4444;
+}
+
+.very-low-probability .probability-value {
+  background-color: #ef4444;
+}
+
 /* 移动端适配 */
 @media (max-width: 640px) {
   .modal-content {
@@ -814,4 +922,142 @@ h2 {
 }
 .version-btn:hover {
   color: #333;
+}
+
+/* 新的概率预测模态窗口 */
+.probability-modal {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  animation: fadeIn 0.3s ease;
+}
+
+.probability-modal-content {
+  background-color: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 700px;
+  max-height: 85vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease;
+  position: relative;
+}
+
+.probability-modal-header {
+  padding: 15px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.probability-modal-body {
+  padding: 20px;
+}
+
+.no-data {
+  text-align: center;
+  margin: 20px 0;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* 在你的 CSS 文件中添加以下样式 */
+
+/* 自定义输入模态框样式 */
+.custom-prompt-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1001; /*确保在其他模态框之上*/
+  font-family: 'Arial', sans-serif;
+  opacity: 0; /* Start hidden for fade-in */
+  transition: opacity 0.3s ease-in-out; /* Transition for fade */
+}
+
+.custom-prompt-modal.fade-in-prompt {
+  opacity: 1;
+}
+
+.custom-prompt-modal.fade-out-prompt {
+  opacity: 0;
+}
+
+.custom-prompt-content {
+  background-color: #fff;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  transform: scale(0.95); /* Optional: slight scale effect */
+  transition: transform 0.3s ease-in-out; /* Transition for scale */
+}
+
+.custom-prompt-modal.fade-in-prompt .custom-prompt-content {
+  transform: scale(1);
+}
+
+.custom-prompt-modal.fade-out-prompt .custom-prompt-content {
+  transform: scale(0.95);
+}
+
+.custom-prompt-content p {
+  margin-bottom: 20px;
+  font-size: 16px;
+  color: #333;
+}
+
+.custom-prompt-content input[type="number"] {
+  width: calc(100% - 20px);
+  padding: 12px;
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+.custom-prompt-actions {
+  display: flex;
+  justify-content: space-around;
+}
+
+.custom-prompt-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  min-width: 100px;
+}
+
+.custom-prompt-btn#custom-prompt-ok {
+  background-color: #4f46e5; /* 主题蓝色 */
+  color: white;
+}
+
+.custom-prompt-btn#custom-prompt-ok:hover {
+  background-color: #0056b3;
+}
+
+.custom-prompt-btn.cancel {
+  background-color: #f0f0f0; /* 浅灰色 */
+  color: #333;
+}
+
+.custom-prompt-btn.cancel:hover {
+  background-color: #ddd;
 }
