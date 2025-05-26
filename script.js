@@ -518,7 +518,7 @@ function showMajorDetail(major, matchScore) {
   
   // 定义可用的年份列表
   const availableYears = Object.keys(detail.scores).sort((a, b) => b - a); // 按年份降序排列
-  let currentYear = null; // 修改为 null，表示默认不选择任何年份
+  let currentYear = null; // 默认不选择任何年份
   
   // 获取指定年份的分数数据
   function getScoresByYear(year) {
@@ -538,15 +538,13 @@ function showMajorDetail(major, matchScore) {
   });
   yearSelectorHtml += '</div>';
   
-  // 添加预测概率按钮
-  yearSelectorHtml += `<button id="predict-probability-btn" class="predict-btn">预测录取概率</button>`;
-  
   // 构建学校和分数线列表的初始显示
   function buildSchoolsList(year) {
     // 如果没有选择年份，返回提示信息
-    // if (!year) {
-    //   return '<p class="no-year-selected">请选择一个年份以查看对应院校及分数线</p>';
-    // }
+    if (!year) {
+      return '<p class="no-year-selected">请选择一个年份以查看对应院校及分数线</p>';
+    }
+    
     const yearScores = getScoresByYear(year);
     let schoolsHtml = '<ul class="schools-list">';
     // 直接遍历 yearScores 的键值对，顺序就是 yearScores 的插入顺序
@@ -557,6 +555,7 @@ function showMajorDetail(major, matchScore) {
     return schoolsHtml;
   }
   
+  // 创建新的模态窗口HTML结构，将年份选择和预测概率按钮并排放置
   modal.innerHTML = `
     <div class="modal-content">
       <div class="modal-header">
@@ -564,20 +563,37 @@ function showMajorDetail(major, matchScore) {
         <button class="close-btn">&times;</button>
       </div>
       <div class="modal-body">
+        <!-- 专业介绍部分 -->
         <div class="detail-section">
           <h4>专业介绍</h4>
           <p>${detail.description}</p>
         </div>
-        <div class="detail-section">
-          <h4>主要开设院校及分数线</h4>
+        
+        <!-- 按钮选择区域 - 两个按钮并排 -->
+        <div class="detail-section tab-buttons">
+          <button class="tab-btn active" id="scores-tab-btn">查看历年分数线</button>
+          <button class="tab-btn" id="prediction-tab-btn">预测录取概率</button>
+        </div>
+        
+        <!-- 分割线 -->
+        <div class="custom-divider"></div>
+
+        <!-- 院校分数线部分 - 默认显示 -->
+        <div class="detail-section tab-content" id="scores-tab">
           <div class="year-control-panel">
             ${yearSelectorHtml}
           </div>
           <div id="schools-data">
             ${buildSchoolsList(currentYear)}
           </div>
+        </div>
+        
+        <!-- 预测概率部分 - 默认隐藏 -->
+        <div class="detail-section tab-content" id="prediction-tab" style="display:none;">
+          <div class="prediction-controls">
+            <button id="predict-probability-btn" class="predict-btn">开始预测录取概率</button>
+          </div>
           <div id="probability-results" class="probability-results" style="display: none;">
-            <h4>录取概率预测结果</h4>
             <p class="prediction-note">注：预测结果仅供参考，实际录取情况受多种因素影响。</p>
             <ul id="probability-list" class="probability-list"></ul>
           </div>
@@ -585,7 +601,6 @@ function showMajorDetail(major, matchScore) {
       </div>
     </div>
   `;
-
   
   // 添加到页面
   document.body.appendChild(modal);
@@ -608,7 +623,29 @@ function showMajorDetail(major, matchScore) {
     }
   });
   
-  // 添加年份切换事件 - 修改为复选框处理逻辑
+  // 添加标签切换功能
+  const scoresTabBtn = modal.querySelector('#scores-tab-btn');
+  const predictionTabBtn = modal.querySelector('#prediction-tab-btn');
+  const scoresTab = modal.querySelector('#scores-tab');
+  const predictionTab = modal.querySelector('#prediction-tab');
+  
+  scoresTabBtn.addEventListener('click', () => {
+    // 激活分数线标签
+    scoresTabBtn.classList.add('active');
+    predictionTabBtn.classList.remove('active');
+    scoresTab.style.display = 'block';
+    predictionTab.style.display = 'none';
+  });
+  
+  predictionTabBtn.addEventListener('click', () => {
+    // 激活预测标签
+    predictionTabBtn.classList.add('active');
+    scoresTabBtn.classList.remove('active');
+    predictionTab.style.display = 'block';
+    scoresTab.style.display = 'none';
+  });
+  
+  // 添加年份切换事件 - 复选框处理逻辑
   const yearCheckboxes = modal.querySelectorAll('input[name="score-year"]');
   yearCheckboxes.forEach(checkbox => {
     checkbox.addEventListener('change', (e) => {
@@ -628,9 +665,6 @@ function showMajorDetail(major, matchScore) {
         const schoolsDataContainer = modal.querySelector('#schools-data');
         schoolsDataContainer.innerHTML = buildSchoolsList(null);
       }
-      
-      // 移除此行代码，让预测概率结果持续显示
-      // document.getElementById('probability-results').style.display = 'none';
     });
   });
   
@@ -655,7 +689,6 @@ function showMajorDetail(major, matchScore) {
   });
 }
 
-// 新增：显示自定义输入模态框的函数
 function showCustomPrompt(message, callback) {
   const promptModal = document.createElement('div');
   promptModal.className = 'custom-prompt-modal';
@@ -833,11 +866,7 @@ function predictAdmissionProbability(detail, userRank) {
     }
   }
   
-  // 按概率从高到低排序，如果概率相同（保留两位小数后），则按平均位次 mu 从小到大排序（mu越小越好）
   schoolProbabilities.sort((a, b) => {
-    const prob_a = parseFloat(a.probability.toFixed(2));
-    const prob_b = parseFloat(b.probability.toFixed(2));
-
     return a.mu - b.mu;
   });
   
@@ -858,6 +887,12 @@ function predictAdmissionProbability(detail, userRank) {
   
   // 显示结果区域
   probResults.style.display = 'block';
+  
+  // 更改按钮文本为"重新预测录取概率"
+  const predictBtn = document.getElementById('predict-probability-btn');
+  if (predictBtn) {
+    predictBtn.textContent = '重新预测录取概率';
+  }
 }
 
 // 根据概率值获取对应的CSS类
@@ -868,7 +903,6 @@ function getProbabilityClass(probability) {
   return 'very-low-probability';
 }
 
-// 修改 showCombinedResult 函数，用于显示学科方向选择
 function showCombinedResult(is_developer = false){
   // 隐藏主界面，显示测试界面
   if (is_developer) {
