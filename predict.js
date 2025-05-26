@@ -30,13 +30,16 @@ function sampleStd(arr) {
     return Math.sqrt(variance);
 }
 
-// 推测标准差（根据排名区间）
+
 function estimateSigmaFromRank(rank) {
-    if (rank <= 3000) return 3000;
-    else if (rank <= 8000) return 4000;
-    else if (rank <= 15000) return 5000;
-    else if (rank <= 30000) return 6000;
-    else return 7500;
+    if (rank <= 1000) return 100;
+    else if (rank <= 2000) return 400;
+    else if (rank <= 3000) return 800;
+    else if (rank <= 4000) return 1200;
+    else if (rank <= 5000) return 1800;
+    else if (rank <= 7500) return 2500;
+    else if (rank <= 10000) return 3000;
+    else return 4500;
 }
 
 // 主函数
