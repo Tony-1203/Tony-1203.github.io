@@ -233,7 +233,7 @@ function showMBTIResult() {
 
 // 显示职业兴趣测试结果
 function showCareerResult() {
-  // 计算RIASEC得分并排序
+  // 定义 RIASEC 类型及其描述
   const scores = [
     { type: 'R', score: careerScores.R, name: '现实型 (Realistic)', description: '喜欢动手操作或使用工具和机器，倾向于技术性和实用性工作。' },
     { type: 'I', score: careerScores.I, name: '研究型 (Investigative)', description: '喜欢分析和解决问题，倾向于研究性和科学性工作。' },
@@ -242,23 +242,66 @@ function showCareerResult() {
     { type: 'E', score: careerScores.E, name: '企业型 (Enterprising)', description: '喜欢领导和说服他人，倾向于销售、管理或创业工作。' },
     { type: 'C', score: careerScores.C, name: '常规型 (Conventional)', description: '喜欢有序和结构化的活动，倾向于组织、数据处理或行政工作。' }
   ];
-  
-  // 按分数排序
-  scores.sort((a, b) => b.score - a.score);
-  
-  // 构建结果展示
+
+  // 六边形邻近处理逻辑
+  function getTopRIASECTypes(scores) {
+    const riasecOrder = ['R', 'C', 'E', 'S', 'A', 'I'];
+    const adjacencyMap = {
+      R: ['C', 'I'],
+      C: ['R', 'E'],
+      E: ['C', 'S'],
+      S: ['E', 'A'],
+      A: ['S', 'I'],
+      I: ['A', 'R']
+    };
+
+    // 主排序：分数；次排序：六边形顺序
+    scores.sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      return riasecOrder.indexOf(a.type) - riasecOrder.indexOf(b.type);
+    });
+
+    const result = [scores[0]];
+
+    for (let i = 1; i < scores.length && result.length < 3; i++) {
+      const current = scores[i];
+      const sameScore = current.score === result[result.length - 1].score;
+      const isAdjacent = result.some(r => adjacencyMap[r.type].includes(current.type));
+
+      if (!result.find(r => r.type === current.type)) {
+        if (sameScore && isAdjacent) {
+          result.push(current);
+        } else if (!sameScore) {
+          result.push(current);
+        }
+      }
+    }
+
+    // 补足 3 个
+    for (let i = 0; result.length < 3 && i < scores.length; i++) {
+      if (!result.find(r => r.type === scores[i].type)) {
+        result.push(scores[i]);
+      }
+    }
+
+    return result;
+  }
+
+  const topScores = getTopRIASECTypes(scores);
+  const typeCombo = topScores.map(s => s.type).join('');
+  career_result = typeCombo;
+
+  // 构建结果 HTML
   let resultHTML = `
     <h2>你的职业兴趣类型</h2>
-    <div class="result-type">${scores[0].type}${scores[1].type}${scores[2].type}</div>
+    <div class="result-type">${typeCombo}</div>
     <div class="result">
-      <p>你的职业兴趣类型组合是：<strong>${scores[0].type}${scores[1].type}${scores[2].type}</strong>，以下是各项得分（从高到低）：</p>
+      <p>你的职业兴趣类型组合是：<strong>${typeCombo}</strong>，以下是各项得分（从高到低）：</p>
       <div class="career-scores">
   `;
 
-  career_result = scores[0].type + scores[1].type + scores[2].type;
-  
-  // 添加每个类型的得分条形图
-  scores.forEach(item => {
+  // 添加前3项图表
+  topScores.forEach(item => {
     const percentage = (item.score / flatQuestions.length) * 100;
     resultHTML += `
       <div class="career-score-item">
@@ -271,22 +314,24 @@ function showCareerResult() {
       <p class="career-description">${item.description}</p>
     `;
   });
-  
+
+  // 主导类型和建议职业
   resultHTML += `
       </div>
       <div class="career-explanation">
-        <p>你的主导类型是：<strong>${scores[0].name}</strong></p>
+        <p>你的主导类型是：<strong>${topScores[0].name}</strong></p>
         <p>根据霍兰德职业兴趣理论，你可能适合的职业领域包括：</p>
         <div class="career-suggestions">
-          ${getCareerSuggestions(scores[0].type, scores[1].type)}
+          ${getCareerSuggestions(topScores[0].type, topScores[1].type)}
         </div>
       </div>
     </div>
     <button class="restart-btn" onclick="backToMain()">返回主页</button>
   `;
-  
+
   document.getElementById('app').innerHTML = resultHTML;
 }
+
 
 // 获取职业建议
 function getCareerSuggestions(primaryType, secondaryType) {
