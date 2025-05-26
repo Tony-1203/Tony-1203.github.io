@@ -562,8 +562,13 @@ function showMajorDetail(major, matchScore) {
 }
 
 // 修改 showCombinedResult 函数，用于显示学科方向选择
-function showCombinedResult() {
+function showCombinedResult(is_developer = false){
   // 隐藏主界面，显示测试界面
+  if (is_developer) {
+    mbti_result = 'INTJ'; // 开发者模式下默认MBTI结果
+    career_result = 'RIA'; // 开发者模式下默认职业兴趣结果
+  }
+
   document.getElementById('main-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
   document.getElementById('app').className = 'card'; // 使用通用卡片样式

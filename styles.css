@@ -798,9 +798,20 @@ h2 {
   position: fixed;
   right: 20px;
   bottom: 20px;
-  color: #888;
-  font-size: 14px;
   z-index: 999;
   background: transparent;
-  pointer-events: none;
+}
+
+.version-btn {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  transition: color 0.2s;
+}
+.version-btn:hover {
+  color: #333;
 }
