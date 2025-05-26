@@ -11,6 +11,7 @@ let mbti_result = "";
 let career_result = "";
 let mbti_description = ""; // 存储MBTI测试的性格描述
 let selectedDomain = ""; // 新增：存储用户选择的学科方向
+let global_userRank = 0;
 
 // 选择测试类型
 function selectTest(testType) {
@@ -517,20 +518,20 @@ function showMajorDetail(major, matchScore) {
   
   // 定义可用的年份列表
   const availableYears = Object.keys(detail.scores).sort((a, b) => b - a); // 按年份降序排列
-  let currentYear = availableYears[0] || '2023'; // 默认显示最新年份
+  let currentYear = null; // 修改为 null，表示默认不选择任何年份
   
   // 获取指定年份的分数数据
   function getScoresByYear(year) {
     return detail.scores[year] || {};
   }
   
-  // 构建年份选择器
+  // 构建年份选择器 - 默认不选中任何年份
   let yearSelectorHtml = '<div class="year-selector">';
   yearSelectorHtml += '<span>选择年份: </span>';
   availableYears.forEach(year => {
     yearSelectorHtml += `
       <label class="year-option">
-        <input type="radio" name="score-year" value="${year}" ${year === currentYear ? 'checked' : ''}>
+        <input type="checkbox" name="score-year" value="${year}">
         <span>${year}年</span>
       </label>
     `;
@@ -538,18 +539,22 @@ function showMajorDetail(major, matchScore) {
   yearSelectorHtml += '</div>';
   
   // 添加预测概率按钮
-  yearSelectorHtml += `<button id="predict-probability-btn" class="predict-btn">预测概率</button>`;
+  yearSelectorHtml += `<button id="predict-probability-btn" class="predict-btn">预测录取概率</button>`;
   
   // 构建学校和分数线列表的初始显示
   function buildSchoolsList(year) {
-      const yearScores = getScoresByYear(year);
-      let schoolsHtml = '<ul class="schools-list">';
-      // 直接遍历 yearScores 的键值对，顺序就是 yearScores 的插入顺序
-      Object.entries(yearScores).forEach(([school, score]) => {
-          schoolsHtml += `<li><span class="school-name">${school}</span> <span class="school-score">${score}</span></li>`;
-      });
-      schoolsHtml += '</ul>';
-      return schoolsHtml;
+    // 如果没有选择年份，返回提示信息
+    // if (!year) {
+    //   return '<p class="no-year-selected">请选择一个年份以查看对应院校及分数线</p>';
+    // }
+    const yearScores = getScoresByYear(year);
+    let schoolsHtml = '<ul class="schools-list">';
+    // 直接遍历 yearScores 的键值对，顺序就是 yearScores 的插入顺序
+    Object.entries(yearScores).forEach(([school, score]) => {
+      schoolsHtml += `<li><span class="school-name">${school}</span> <span class="school-score">${score}</span></li>`;
+    });
+    schoolsHtml += '</ul>';
+    return schoolsHtml;
   }
   
   modal.innerHTML = `
@@ -603,17 +608,29 @@ function showMajorDetail(major, matchScore) {
     }
   });
   
-  // 添加年份切换事件
-  const yearRadios = modal.querySelectorAll('input[name="score-year"]');
-  yearRadios.forEach(radio => {
-    radio.addEventListener('change', (e) => {
+  // 添加年份切换事件 - 修改为复选框处理逻辑
+  const yearCheckboxes = modal.querySelectorAll('input[name="score-year"]');
+  yearCheckboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', (e) => {
+      // 如果当前复选框被选中，则取消选中其他复选框
       if (e.target.checked) {
         currentYear = e.target.value;
+        yearCheckboxes.forEach(cb => {
+          if (cb !== e.target) {
+            cb.checked = false;
+          }
+        });
         const schoolsDataContainer = modal.querySelector('#schools-data');
         schoolsDataContainer.innerHTML = buildSchoolsList(currentYear);
-        // 隐藏概率预测结果
-        document.getElementById('probability-results').style.display = 'none';
+      } else {
+        // 如果当前复选框被取消选中，则清空当前年份，不显示任何数据
+        currentYear = null;
+        const schoolsDataContainer = modal.querySelector('#schools-data');
+        schoolsDataContainer.innerHTML = buildSchoolsList(null);
       }
+      
+      // 移除此行代码，让预测概率结果持续显示
+      // document.getElementById('probability-results').style.display = 'none';
     });
   });
   
@@ -630,6 +647,7 @@ function showMajorDetail(major, matchScore) {
         alert("请输入有效的高考位次（1-1000000之间的数字）");
         return;
       }
+      global_userRank = rank; // 更新全局变量
       
       // 预测各学校的录取概率
       predictAdmissionProbability(detail, rank);
@@ -712,6 +730,16 @@ function predictAdmissionProbability(detail, userRank) {
   
   // 清空旧结果
   probList.innerHTML = '';
+  
+  // 更新预测结果区域的标题，显示用户输入的位次
+  probResults.innerHTML = `
+    <h4>录取概率预测结果 <span class="user-rank-info">(位次: ${userRank})</span></h4>
+    <p class="prediction-note">注：预测结果仅供参考，实际录取情况受多种因素影响。</p>
+    <ul id="probability-list" class="probability-list"></ul>
+  `;
+  
+  // 获取新的列表元素（因为我们重新创建了HTML结构）
+  const newProbList = document.getElementById('probability-list');
   
   // 准备学校和历年分数线数据
   const schoolProbabilities = [];
@@ -810,10 +838,6 @@ function predictAdmissionProbability(detail, userRank) {
     const prob_a = parseFloat(a.probability.toFixed(2));
     const prob_b = parseFloat(b.probability.toFixed(2));
 
-    if (prob_b - prob_a > 0.1) {
-      return prob_b - prob_a; // 概率高的在前
-    }
-    // 概率相同，比较平均位次 mu，mu 小的（排名靠前的）在前
     return a.mu - b.mu;
   });
   
@@ -821,7 +845,7 @@ function predictAdmissionProbability(detail, userRank) {
   for (const item of schoolProbabilities) {
     const probabilityClass = getProbabilityClass(item.probability);
 
-    probList.innerHTML += `
+    newProbList.innerHTML += `
       <li class="${probabilityClass}">
         <span class="school-name">${item.school}</span>
         <span class="probability-value">${item.probability.toFixed(2)}%</span>
