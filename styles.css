@@ -1091,3 +1091,129 @@ h2 {
   background-color: #ccc;
   margin: 16px 0;
 }
+
+/* 登录和注册样式 */
+.auth-card {
+  max-width: 500px;
+  padding: 30px;
+}
+
+.auth-toggle {
+  display: flex;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #f3f4f6;
+}
+
+.auth-toggle-btn {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.auth-toggle-btn.active {
+  background-color: #4f46e5;
+  color: white;
+}
+
+.auth-form {
+  animation: fadeIn 0.3s ease;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #4b5563;
+  text-align: left;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+.auth-input:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+}
+
+.auth-submit-btn {
+  width: 100%;
+  padding: 12px;
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.auth-submit-btn:hover {
+  background-color: #4338ca;
+  transform: translateY(-2px);
+}
+
+.auth-message {
+  margin-top: 15px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.auth-message.error {
+  color: #dc2626;
+}
+
+.auth-message.success {
+  color: #10b981;
+}
+
+.user-info {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.logout-btn {
+  background: none;
+  border: none;
+  color: #4f46e5;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0 5px;
+  margin-left: 5px;
+  border-bottom: 1px solid transparent;
+}
+
+.logout-btn:hover {
+  border-bottom-color: #4f46e5;
+}
+
+#auth-toggle-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+#auth-toggle-container .auth-toggle {
+  width: 80%;
+}

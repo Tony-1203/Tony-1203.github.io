@@ -10,11 +10,63 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="container">
+  <!-- 添加登录和注册界面 -->
+  <div class="container" id="auth-container">
+    <h1>性格与职业测试</h1>
+    
+    <div class="card auth-card" id="login-screen">
+      <div id="auth-toggle-container">
+        <div class="auth-toggle">
+          <button class="auth-toggle-btn active" id="login-toggle">登录</button>
+          <button class="auth-toggle-btn" id="register-toggle">注册</button>
+        </div>
+      </div>
+
+      <!-- 登录表单 -->
+      <div id="login-form" class="auth-form">
+        <div class="form-group">
+          <label for="login-username">用户名</label>
+          <input type="text" id="login-username" class="auth-input" placeholder="请输入用户名">
+        </div>
+        <div class="form-group">
+          <label for="login-password">密码</label>
+          <input type="password" id="login-password" class="auth-input" placeholder="请输入密码">
+        </div>
+        <button id="login-btn" class="auth-submit-btn">登录</button>
+        <p class="auth-message" id="login-message"></p>
+      </div>
+
+      <!-- 注册表单 -->
+      <div id="register-form" class="auth-form" style="display:none;">
+        <div class="form-group">
+          <label for="register-username">用户名</label>
+          <input type="text" id="register-username" class="auth-input" placeholder="请创建用户名">
+        </div>
+        <div class="form-group">
+          <label for="register-password">密码</label>
+          <input type="password" id="register-password" class="auth-input" placeholder="请设置密码">
+        </div>
+        <div class="form-group">
+          <label for="register-confirm-password">确认密码</label>
+          <input type="password" id="register-confirm-password" class="auth-input" placeholder="请再次输入密码">
+        </div>
+        <button id="register-btn" class="auth-submit-btn">注册</button>
+        <p class="auth-message" id="register-message"></p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 主测试容器 -->
+  <div class="container" id="main-container" style="display: none;">
     <h1>性格与职业测试</h1>
     
     <!-- 主界面选择器 -->
     <div class="card" id="main-screen">
+      <!-- 用户信息区 -->
+      <div class="user-info">
+        <p>欢迎, <span id="user-welcome"></span> <button id="logout-btn" class="logout-btn">登出</button></p>
+      </div>
+
       <h2>请选择测试类型</h2>
       <div class="test-selection">
         <button class="test-btn mbti-btn" onclick="selectTest('mbti')">
@@ -53,11 +105,12 @@
   <!-- 在body底部引入JavaScript文件 -->
   <script src="majors_data.js"></script>
   <script src="majors_detail_data.js"></script>
+  <script src="auth.js"></script>
   <script src="script.js"></script>
   <script src="predict.js"></script>
   <script src="score_rank_data.js"></script>
   <footer class="footer-version">
-  <button class="version-btn" onclick="showCombinedResult(is_developer=true)">v1.3.5-250527 © 2025 Tony</button>
-</footer>
+    <button class="version-btn" onclick="showCombinedResult(is_developer=true)">v1.3.5-250527 © 2025 Tony</button>
+  </footer>
 </body>
 </html>
