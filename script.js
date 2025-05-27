@@ -678,7 +678,7 @@ function showMajorDetail(major, matchScore) {
       // 验证输入
       const rank = parseInt(userRank);
       if (isNaN(rank) || rank <= 0 || rank > 1000000) {
-        alert("请输入有效的高考位次（1-1000000之间的数字）");
+        showCustomAlert("请输入有效的高考位次（1-1000000之间的数字）");
         return;
       }
       global_userRank = rank; // 更新全局变量
@@ -1179,3 +1179,64 @@ document.addEventListener('DOMContentLoaded', function() {
   // 检查是否两个测试都已完成
   checkAndShowCombinedButton();
 });
+
+// 添加自定义弹窗函数
+function showCustomAlert(message) {
+  const alertModal = document.createElement('div');
+  alertModal.className = 'custom-prompt-modal';
+  alertModal.innerHTML = `
+    <div class="custom-prompt-content">
+      <p>${message}</p>
+      <div class="custom-prompt-actions">
+        <button id="custom-alert-ok" class="custom-prompt-btn">确定</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(alertModal);
+  document.body.style.overflow = 'hidden'; // 防止背景滚动
+
+  // 触发重排以确保过渡效果应用
+  void alertModal.offsetWidth; 
+
+  // 添加淡入效果类
+  alertModal.classList.add('fade-in-prompt');
+
+  const okButton = alertModal.querySelector('#custom-alert-ok');
+
+  const closeAlert = () => {
+    // 添加淡出效果类
+    alertModal.classList.remove('fade-in-prompt');
+    alertModal.classList.add('fade-out-prompt');
+
+    // 等待动画完成后移除
+    setTimeout(() => {
+      if (document.body.contains(alertModal)) {
+        document.body.removeChild(alertModal);
+      }
+      document.body.style.overflow = '';
+      // 移除键盘事件监听器
+      document.removeEventListener('keydown', handleKeydown);
+    }, 300); 
+  };
+
+  // 处理键盘事件的函数
+  const handleKeydown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault(); // 防止默认行为
+      okButton.click();
+    }
+  };
+
+  // 添加键盘事件监听器
+  document.addEventListener('keydown', handleKeydown);
+
+  okButton.addEventListener('click', closeAlert);
+
+  // 点击模态窗口外部关闭
+  alertModal.addEventListener('click', (e) => {
+    if (e.target === alertModal) {
+      closeAlert();
+    }
+  });
+}
