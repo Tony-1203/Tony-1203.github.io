@@ -102,15 +102,58 @@
     </div>
   </div>
 
+  <!-- 开发者设置模态框 -->
+  <div id="developer-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>开发者模式设置</h2>
+        <span class="close" onclick="closeDeveloperModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p>请输入测试结果以进行综合分析：</p>
+        
+        <div class="form-group">
+          <label for="dev-mbti-result">MBTI结果 (4个字母):</label>
+          <input type="text" id="dev-mbti-result" class="auth-input" placeholder="例如: INTJ" maxlength="4">
+          <small>请输入4个字母的MBTI类型 (如INTJ, ENFP等)</small>
+        </div>
+        
+        <div class="form-group">
+          <label for="dev-career-result">职业兴趣结果 (3个字母):</label>
+          <input type="text" id="dev-career-result" class="auth-input" placeholder="例如: IAS" maxlength="3">
+          <small>请输入3个字母的Holland代码 (如IAS, SEC等)</small>
+        </div>
+        
+        <div class="form-group">
+          <label for="dev-domain-select">选择专业方向:</label>
+          <select id="dev-domain-select" class="auth-input">
+            <option value="">请选择专业方向</option>
+            <option value="physics">物理</option>
+            <option value="history">历史</option>
+          </select>
+        </div>
+        
+        <div class="modal-actions">
+          <button id="dev-submit-btn" class="auth-submit-btn">生成综合分析</button>
+          <button id="dev-cancel-btn" class="auth-submit-btn secondary" onclick="closeDeveloperModal()">取消</button>
+        </div>
+        
+        <p class="auth-message" id="dev-message"></p>
+      </div>
+    </div>
+  </div>
+
   <!-- 在body底部引入JavaScript文件 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="majors_data.js"></script>
   <script src="majors_detail_data.js"></script>
+  <script src="config.js"></script>
   <script src="auth.js"></script>
   <script src="script.js"></script>
   <script src="predict.js"></script>
   <script src="score_rank_data.js"></script>
   <footer class="footer-version">
-    <button class="version-btn" onclick="showCombinedResult(is_developer=true)">v1.4.0-250527 © 2025 Tony</button>
+    <button class="version-btn" onclick="showCombinedResult(is_developer=true)">v2.0.0-250527 © 2025 Tony</button>
   </footer>
 </body>
 </html>

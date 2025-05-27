@@ -13,6 +13,23 @@ let mbti_description = ""; // 存储MBTI测试的性格描述
 let selectedDomain = ""; // 新增：存储用户选择的学科方向
 let global_userRank = 0;
 
+// 开发者模式专用函数：设置测试数据
+function setDeveloperData(mbtiValue, careerValue, domainValue, mbtiDesc) {
+    console.log('🔧 setDeveloperData被调用，参数:', { mbtiValue, careerValue, domainValue, mbtiDesc });
+    
+    mbti_result = mbtiValue;
+    career_result = careerValue;
+    selectedDomain = domainValue;
+    mbti_description = mbtiDesc;
+    
+    console.log('✅ 开发者数据已设置:', {
+        mbti_result,
+        career_result,
+        selectedDomain,
+        mbti_description
+    });
+}
+
 // 选择测试类型
 function selectTest(testType) {
   // 隐藏主界面，显示测试界面
@@ -222,6 +239,11 @@ function showMBTIResult() {
   // 存储性格描述，用于综合结果展示
   mbti_description = personalityDescriptions[result] || '这是一个独特而有趣的性格组合。';
 
+  // 保存测试结果到 Supabase
+  if (typeof saveUserTestResults === 'function') {
+    saveUserTestResults();
+  }
+
   document.getElementById('app').innerHTML = `
     <h2>你的MBTI性格类型是</h2>
     <div class="result-type">${result}</div>
@@ -291,6 +313,11 @@ function showCareerResult() {
   const topScores = getTopRIASECTypes(scores);
   const typeCombo = topScores.map(s => s.type).join('');
   career_result = typeCombo;
+
+  // 保存测试结果到 Supabase
+  if (typeof saveUserTestResults === 'function') {
+    saveUserTestResults();
+  }
 
   // 构建结果 HTML
   let resultHTML = `
@@ -928,11 +955,30 @@ function showCombinedResult(is_developer = false){
 
 // 新增函数：根据选择的学科方向生成综合报告
 function generateCombinedReport(domain) {
+  console.log('📈 generateCombinedReport被调用，参数:', domain);
+  console.log('📊 当前全局变量状态:', {
+    mbti_result,
+    career_result,
+    mbti_description,
+    selectedDomain: selectedDomain
+  });
+  
   selectedDomain = domain; // 保存选择的方向
+
+  // 保存测试结果到 Supabase（包含学科选择）
+  if (typeof saveUserTestResults === 'function') {
+    saveUserTestResults();
+  }
+
+  // 确保显示正确的界面
+  document.getElementById('main-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
 
   const appDiv = document.getElementById('app');
   appDiv.innerHTML = ''; // 清空旧内容
   appDiv.className = 'card combined-theme'; // 应用综合报告主题
+  
+  console.log('🎨 界面已切换到综合报告模式');
 
   // 获取MBTI与RIASEC关联度分析
   const mbtiCareerRelations = {
