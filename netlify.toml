@@ -1,0 +1,16 @@
+[build]
+  # 构建命令
+  command = "./build.sh"
+  
+  # 发布目录
+  publish = "."
+
+[build.environment]
+  # 构建环境变量
+  NODE_ENV = "production"
+
+# 重定向规则（SPA 支持）
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

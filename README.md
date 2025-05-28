@@ -44,23 +44,32 @@
 
 ### 1. 环境配置
 
-首先需要配置Supabase连接信息：
+首先需要配置 Supabase 连接信息。项目提供了自动化脚本来简化配置过程：
 
 ```bash
-# 复制配置模板
-cp config.template.js config.local.js
+# 运行本地开发环境设置脚本
+./dev.sh
 ```
 
-然后编辑 `config.local.js` 文件，填入您的Supabase配置信息：
+或者手动配置：
 
-```javascript
-const SUPABASE_URL = '您的Supabase URL'; 
-const SUPABASE_ANON_KEY = '您的Supabase匿名密钥';
+```bash
+# 复制本地环境配置模板
+cp env.local.js env.js
 ```
 
 ### 2. 启动本地开发
 
-在本地环境中，系统会自动加载 `config.local.js` 文件。直接在浏览器中打开 `index.html` 即可开始使用。
+在本地环境中，系统会自动加载 `env.js` 文件。直接在浏览器中打开 `index.html` 即可开始使用。
+
+### 3. Netlify 部署配置
+
+项目已配置 Netlify 自动部署，需要在 Netlify 控制台设置以下环境变量：
+
+- `SUPABASE_URL`: 您的 Supabase 项目 URL
+- `SUPABASE_ANON_KEY`: 您的 Supabase 匿名密钥
+
+构建过程会自动将这些环境变量注入到应用中。
 
 ## 📊 技术栈
 
