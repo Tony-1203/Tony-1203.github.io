@@ -1,5 +1,5 @@
 // Supabase 配置模板
-// 请复制此文件为 config.local.js 并填入真实的配置信息
+// 复制此文件为 config.js 并填入您的实际配置信息
 
 const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE'; 
 const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE';

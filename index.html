@@ -147,7 +147,29 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="majors_data.js"></script>
   <script src="majors_detail_data.js"></script>
-  <script src="config.loader.js"></script>
+  <!-- 动态加载配置文件 -->
+  <script>
+    // 检测当前环境并加载相应的配置文件
+    (function() {
+      const isLocal = window.location.hostname === 'localhost' || 
+                      window.location.hostname === '127.0.0.1' ||
+                      window.location.hostname === '';
+      
+      const configFile = isLocal ? 'config.local.js' : 'config.js';
+      const script = document.createElement('script');
+      script.src = configFile;
+      script.onerror = function() {
+        // 如果配置文件加载失败，显示错误信息
+        console.error('配置文件加载失败，请检查配置');
+        if (isLocal) {
+          alert('本地配置文件 config.local.js 未找到，请复制 config.template.js 并重命名为 config.local.js，然后填入您的配置信息。');
+        } else {
+          alert('配置文件加载失败，请联系管理员。');
+        }
+      };
+      document.head.appendChild(script);
+    })();
+  </script>
   <script src="auth.js"></script>
   <script src="script.js"></script>
   <script src="predict.js"></script>

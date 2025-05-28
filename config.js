@@ -1,6 +1,5 @@
-// Supabase 配置
-// 注意：此文件不包含真实的配置信息
-// 在生产环境中，请使用 config.local.js 或环境变量
+// Supabase 配置 - 生产环境
+// 请在部署时设置正确的环境变量
 const SUPABASE_URL = process.env.SUPABASE_URL || 'YOUR_SUPABASE_URL_HERE'; 
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY_HERE';
 
