@@ -1,7 +1,6 @@
-// Supabase 配置 - 生产环境
-// 请在部署时设置正确的环境变量
-const SUPABASE_URL = process.env.SUPABASE_URL || 'YOUR_SUPABASE_URL_HERE'; 
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY_HERE';
+// Supabase 配置
+const SUPABASE_URL = 'https://xgfjhunnohnplxfkksen.supabase.co'; 
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhnZmpodW5ub2hucGx4Zmtrc2VuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg0MTcyMTIsImV4cCI6MjA2Mzk5MzIxMn0.j10v6k7xzuz64NwMVtS1_xA-KjuOEoLIldWvsgU_0vw';
 
 // 初始化 Supabase 客户端
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
