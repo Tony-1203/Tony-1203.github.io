@@ -214,84 +214,16 @@ async function login(username, password) {
 async function register(username, password, confirmPassword) {
     const registerMessage = document.getElementById('register-message');
 
-    // 验证输入
-    if (!username || !password || !confirmPassword) {
-        registerMessage.textContent = '所有字段都必须填写';
-        registerMessage.className = 'auth-message error';
-        return;
-    }
-
-    if (password !== confirmPassword) {
-        registerMessage.textContent = '两次输入的密码不匹配';
-        registerMessage.className = 'auth-message error';
-        return;
-    }
-
-    if (password.length < 6) {
-        registerMessage.textContent = '密码长度至少为6位';
-        registerMessage.className = 'auth-message error';
-        return;
-    }
-
-    try {
-        // 显示加载状态
-        registerMessage.textContent = '正在注册...';
-        registerMessage.className = 'auth-message';
-
-        // 检查用户名是否已存在
-        const { data: existingUser } = await supabase
-            .from('users')
-            .select('username')
-            .eq('username', username)
-            .single();
-
-        if (existingUser) {
-            registerMessage.textContent = '用户名已被使用';
-            registerMessage.className = 'auth-message error';
-            return;
-        }
-
-        const passwordHash = await hashPassword(password);
-
-        // 创建新用户
-        const { data: newUser, error } = await supabase
-            .from('users')
-            .insert([
-                {
-                    username: username,
-                    password_hash: passwordHash
-                }
-            ])
-            .select()
-            .single();
-
-        if (error) {
-            console.error('注册错误:', error);
-            registerMessage.textContent = '注册失败，请重试';
-            registerMessage.className = 'auth-message error';
-            return;
-        }
-
-        // 显示成功消息
-        registerMessage.textContent = '注册成功！请登录';
-        registerMessage.className = 'auth-message success';
-
-        // 清空注册表单
-        document.getElementById('register-username').value = '';
-        document.getElementById('register-password').value = '';
-        document.getElementById('register-confirm-password').value = '';
-
-        // 切换到登录表单
-        setTimeout(() => {
-            document.getElementById('login-toggle').click();
-            registerMessage.textContent = '';
-        }, 1500);
-
-    } catch (error) {
-        console.error('注册过程中发生错误:', error);
-        registerMessage.textContent = '注册失败，请检查网络连接';
-        registerMessage.className = 'auth-message error';
-    }
+    // 显示注册失败消息
+    registerMessage.textContent = '注册失败，请联系管理员';
+    registerMessage.className = 'auth-message error';
+    
+    // 清空注册表单
+    document.getElementById('register-username').value = '';
+    document.getElementById('register-password').value = '';
+    document.getElementById('register-confirm-password').value = '';
+    
+    return;
 }
 
 // 登出函数
