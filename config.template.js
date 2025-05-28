@@ -1,8 +1,8 @@
-// Supabase 配置
-// 注意：此文件不包含真实的配置信息
-// 在生产环境中，请使用 config.local.js 或环境变量
-const SUPABASE_URL = process.env.SUPABASE_URL || 'YOUR_SUPABASE_URL_HERE'; 
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY_HERE';
+// Supabase 配置模板
+// 请复制此文件为 config.local.js 并填入真实的配置信息
+
+const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE'; 
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE';
 
 // 初始化 Supabase 客户端
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
