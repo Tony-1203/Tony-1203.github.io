@@ -60,6 +60,56 @@
   <div class="container" id="main-container" style="display: none;">
     <h1>性格与职业测试</h1>
     
+    <!-- 温馨提示界面 -->
+    <div class="card welcome-tip-screen" id="welcome-tip-screen" style="display: none;">
+      <div class="welcome-tip-container">
+        <div class="welcome-tip-header">
+          <div class="welcome-icon">👋</div>
+          <h2>欢迎使用心理测试系统</h2>
+          <p class="welcome-subtitle">为了保证测试的准确性和有效性，请仔细阅读以下注意事项</p>
+        </div>
+        
+        <div class="welcome-tip-content">
+          <div class="tip-section">
+            <div class="tip-title">📋 测试次数限制</div>
+            <div class="tip-details">
+              <p>• <strong>MBTI性格测试</strong>：每个账户限制 <span class="highlight">3次</span> 测试机会</p>
+              <p>• <strong>职业兴趣测试</strong>：每个账户限制 <span class="highlight">3次</span> 测试机会</p>
+              <p>• 请珍惜测试机会，认真完成每一次测试</p>
+              <div id="welcome-test-counts" class="welcome-test-counts" style="margin-top: 15px;">
+                <!-- 用户测试次数信息将在这里显示 -->
+              </div>
+            </div>
+          </div>
+          
+          <div class="tip-section">
+            <div class="tip-title">✨ 测试建议</div>
+            <div class="tip-details">
+              <p>• 请确保在安静、不受干扰的环境下进行测试</p>
+              <p>• 根据真实想法回答，无对错之分</p>
+              <p>• 完成两项测试后可查看综合分析报告</p>
+              <p>• 建议预留20-30分钟完成单项测试</p>
+            </div>
+          </div>
+          
+          <div class="tip-section">
+            <div class="tip-title">🎯 测试价值</div>
+            <div class="tip-details">
+              <p>• 深入了解自己的性格特质和行为模式</p>
+              <p>• 发现适合的职业发展方向和兴趣领域</p>
+              <p>• 为学业规划和职业选择提供科学参考</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="welcome-tip-actions">
+          <button class="welcome-confirm-btn" onclick="showMainScreen()">
+            我已了解，开始测试
+          </button>
+        </div>
+      </div>
+    </div>
+    
     <!-- 主界面选择器 -->
     <div class="card" id="main-screen">
       <!-- 用户信息区 -->
@@ -154,7 +204,7 @@
   <script src="predict.js"></script>
   <script src="score_rank_data.js"></script>
   <footer class="footer-version">
-    <button class="version-btn" onclick="showCombinedResult(is_developer=false)">v2.0.2-250529 © 2025 Tony</button>
+    <button class="version-btn" onclick="showCombinedResult(is_developer=false)">v2.0.3-250529 © 2025 Tony</button>
   </footer>
 </body>
 </html>

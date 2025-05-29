@@ -478,6 +478,17 @@ function backToMain() {
   }
 }
 
+// 显示主界面（从温馨提示界面切换到主界面）
+function showMainScreen() {
+  document.getElementById('welcome-tip-screen').style.display = 'none';
+  document.getElementById('main-screen').style.display = 'block';
+  
+  // 更新测试次数显示
+  if (typeof updateTestCountsDisplay === 'function') {
+    updateTestCountsDisplay();
+  }
+}
+
 // 检查并显示综合分析按钮
 function checkAndShowCombinedButton() {
   const combinedBtn = document.getElementById('combined-analysis-btn');
@@ -1340,6 +1351,35 @@ async function updateTestCountsDisplay() {
         careerBtn.style.cursor = 'pointer';
         careerDesc.innerHTML = `发现适合你的职业发展方向<br><small style="color: #6b7280;">剩余 ${careerRemaining} 次机会</small>`;
       }
+    }
+  }
+  
+  // 更新温馨提示界面的测试次数显示
+  const welcomeTestCounts = document.getElementById('welcome-test-counts');
+  if (welcomeTestCounts) {
+    if (isDeveloperMode) {
+      welcomeTestCounts.innerHTML = `
+        <div class="test-count-item">
+          <span class="test-count-label">当前状态:</span>
+          <span class="test-count-value developer-mode">开发者模式 - 无限制测试</span>
+        </div>
+      `;
+    } else {
+      const mbtiCount = counts.mbti_count || 0;
+      const careerCount = counts.career_count || 0;
+      const mbtiRemaining = Math.max(0, 3 - mbtiCount);
+      const careerRemaining = Math.max(0, 3 - careerCount);
+      
+      welcomeTestCounts.innerHTML = `
+        <div class="test-count-item">
+          <span class="test-count-label">MBTI性格测试:</span>
+          <span class="test-count-value">剩余 ${mbtiRemaining}/3 次</span>
+        </div>
+        <div class="test-count-item">
+          <span class="test-count-label">职业兴趣测试:</span>
+          <span class="test-count-value">剩余 ${careerRemaining}/3 次</span>
+        </div>
+      `;
     }
   }
 }

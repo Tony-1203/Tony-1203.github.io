@@ -16,7 +16,27 @@ async function checkAuthStatus() {
     if (currentUser) {
         try {
             const userData = JSON.parse(currentUser);
-            // 验证用户是否仍然有效
+            
+            // 特别处理开发者模式
+            if (userData.id === 'dev' || userData.username === 'admin (开发者)') {
+                currentUserData = { id: 'dev', username: 'admin' };
+                // 显示主容器
+                document.getElementById('auth-container').style.display = 'none';
+                document.getElementById('main-container').style.display = 'block';
+                document.getElementById('user-welcome').textContent = 'admin (开发者模式)';
+                
+                // 开发者模式直接显示主界面
+                document.getElementById('welcome-tip-screen').style.display = 'none';
+                document.getElementById('main-screen').style.display = 'block';
+                
+                // 更新测试次数显示
+                if (typeof updateTestCountsDisplay === 'function') {
+                    await updateTestCountsDisplay();
+                }
+                return;
+            }
+            
+            // 验证普通用户是否仍然有效
             const { data: user, error } = await supabase
                 .from('users')
                 .select('id, username')
@@ -29,6 +49,10 @@ async function checkAuthStatus() {
                 document.getElementById('auth-container').style.display = 'none';
                 document.getElementById('main-container').style.display = 'block';
                 document.getElementById('user-welcome').textContent = user.username;
+                
+                // 普通用户显示温馨提示界面
+                document.getElementById('welcome-tip-screen').style.display = 'block';
+                document.getElementById('main-screen').style.display = 'none';
                 
                 // 加载用户测试结果
                 await loadUserTestResults(user.id);
@@ -153,6 +177,10 @@ async function login(username, password) {
         document.getElementById('main-container').style.display = 'block';
         document.getElementById('user-welcome').textContent = 'admin (开发者模式)';
         
+        // 开发者模式直接显示主界面，跳过温馨提示
+        document.getElementById('welcome-tip-screen').style.display = 'none';
+        document.getElementById('main-screen').style.display = 'block';
+        
         // 更新测试次数显示 (开发者模式显示为无限制)
         if (typeof updateTestCountsDisplay === 'function') {
             await updateTestCountsDisplay();
@@ -200,15 +228,19 @@ async function login(username, password) {
         const currentUser = { username: user.username, id: user.id };
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
         
-        // 显示主内容
+        // 显示主内容容器
         document.getElementById('auth-container').style.display = 'none';
         document.getElementById('main-container').style.display = 'block';
         document.getElementById('user-welcome').textContent = username;
         
+        // 首次登录显示温馨提示界面，隐藏主界面
+        document.getElementById('welcome-tip-screen').style.display = 'block';
+        document.getElementById('main-screen').style.display = 'none';
+        
         // 加载用户测试结果
         await loadUserTestResults(user.id);
         
-        // 更新测试次数显示
+        // 更新测试次数显示（包括温馨提示界面）
         if (typeof updateTestCountsDisplay === 'function') {
             await updateTestCountsDisplay();
         }
