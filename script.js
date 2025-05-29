@@ -75,7 +75,21 @@ function selectTest(testType) {
         </div>
       </div>
     `;
-    document.getElementById('start-mbti-test-btn').onclick = () => {
+    document.getElementById('start-mbti-test-btn').onclick = async () => {
+      // 检查并递增测试次数
+      const testCountResult = await checkAndIncrementTestCount('mbti');
+      
+      if (!testCountResult.canTake) {
+        // 显示错误信息
+        showTestLimitMessage(testCountResult.error, 'mbti');
+        return;
+      }
+
+      // 显示剩余次数提示
+      if (testCountResult.remainingAttempts > 0) {
+        console.log(`开始MBTI测试，剩余${testCountResult.remainingAttempts}次机会`);
+      }
+
       currentScores = mbtiScores;
       // 为MBTI测试初始化问题加载UI
       appDiv.innerHTML = `
@@ -105,7 +119,21 @@ function selectTest(testType) {
       </div>
     `;
 
-    document.getElementById('start-career-test-btn').onclick = () => {
+    document.getElementById('start-career-test-btn').onclick = async () => {
+      // 检查并递增测试次数
+      const testCountResult = await checkAndIncrementTestCount('career');
+      
+      if (!testCountResult.canTake) {
+        // 显示错误信息
+        showTestLimitMessage(testCountResult.error, 'career');
+        return;
+      }
+
+      // 显示剩余次数提示
+      if (testCountResult.remainingAttempts > 0) {
+        console.log(`开始职业兴趣测试，剩余${testCountResult.remainingAttempts}次机会`);
+      }
+
       currentScores = careerScores;
       current = 0; // 确保从第一个问题开始
       currentCategory = ""; // 重置类别
@@ -443,6 +471,11 @@ function backToMain() {
   
   // 检查是否两个测试都已完成，显示或隐藏综合分析按钮
   checkAndShowCombinedButton();
+  
+  // 更新测试次数显示
+  if (typeof updateTestCountsDisplay === 'function') {
+    updateTestCountsDisplay();
+  }
 }
 
 // 检查并显示综合分析按钮
@@ -1220,69 +1253,93 @@ function resetAllTests() {
   backToMain();
 }
 
-// 页面加载完成后初始化
-document.addEventListener('DOMContentLoaded', function() {
-  // 检查是否两个测试都已完成
-  checkAndShowCombinedButton();
-});
-
-// 添加自定义弹窗函数
-function showCustomAlert(message) {
-  const alertModal = document.createElement('div');
-  alertModal.className = 'custom-prompt-modal';
-  alertModal.innerHTML = `
-    <div class="custom-prompt-content">
-      <p>${message}</p>
-      <div class="custom-prompt-actions">
-        <button id="custom-alert-ok" class="custom-prompt-btn">确定</button>
+// 显示测试限制消息
+function showTestLimitMessage(message, testType) {
+  const appDiv = document.getElementById('app');
+  const testName = testType === 'mbti' ? 'MBTI性格测试' : '职业兴趣测试';
+  const themeClass = testType === 'mbti' ? 'mbti-theme' : 'career-theme';
+  
+  appDiv.className = `card ${themeClass}`;
+  appDiv.innerHTML = `
+    <div class="test-limit-container" style="text-align: center; padding: 40px 20px;">
+      <div class="test-limit-icon" style="font-size: 60px; margin-bottom: 20px; color: #ef4444;">
+        ⚠️
       </div>
+      <h2 style="color: #ef4444; margin-bottom: 20px;">测试次数已达上限</h2>
+      <div class="test-limit-message" style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+        <p style="color: #dc2626; font-size: 16px; margin: 0;">${message}</p>
+      </div>
+      <div class="test-limit-info" style="background: #f9fafb; border-radius: 8px; padding: 20px; margin-bottom: 30px; text-align: left;">
+        <h4 style="color: #374151; margin-bottom: 15px;">为什么有次数限制？</h4>
+        <ul style="color: #6b7280; margin: 0; padding-left: 20px;">
+          <li>确保测试结果的可信度和一致性</li>
+          <li>避免过度测试影响结果准确性</li>
+          <li>鼓励深入思考每个问题而非随意作答</li>
+        </ul>
+      </div>
+      <button class="restart-btn" onclick="backToMain()" style="background: #6b7280;">返回主页</button>
     </div>
   `;
+}
 
-  document.body.appendChild(alertModal);
-  document.body.style.overflow = 'hidden'; // 防止背景滚动
+// 更新主界面显示测试次数信息
+async function updateTestCountsDisplay() {
+  if (typeof getUserTestCounts !== 'function') {
+    return; // 如果函数不存在，直接返回
+  }
 
-  // 触发重排以确保过渡效果应用
-  void alertModal.offsetWidth; 
+  // 检查是否为开发者模式
+  const isDeveloperMode = currentUserData && currentUserData.id === 'dev';
 
-  // 添加淡入效果类
-  alertModal.classList.add('fade-in-prompt');
-
-  const okButton = alertModal.querySelector('#custom-alert-ok');
-
-  const closeAlert = () => {
-    // 添加淡出效果类
-    alertModal.classList.remove('fade-in-prompt');
-    alertModal.classList.add('fade-out-prompt');
-
-    // 等待动画完成后移除
-    setTimeout(() => {
-      if (document.body.contains(alertModal)) {
-        document.body.removeChild(alertModal);
+  const counts = await getUserTestCounts();
+  const mbtiBtn = document.querySelector('.mbti-btn');
+  const careerBtn = document.querySelector('.career-btn');
+  
+  if (mbtiBtn) {
+    const mbtiDesc = mbtiBtn.querySelector('.test-desc');
+    
+    if (isDeveloperMode) {
+      // 开发者模式显示无限制
+      mbtiBtn.style.opacity = '1';
+      mbtiBtn.style.cursor = 'pointer';
+      mbtiDesc.innerHTML = `了解你的人格特质与行为倾向<br><small style="color: #10b981;">开发者模式 - 无限制</small>`;
+    } else {
+      const mbtiCount = counts.mbti_count || 0;
+      const mbtiRemaining = Math.max(0, 3 - mbtiCount);
+      
+      if (mbtiCount >= 3) {
+        mbtiBtn.style.opacity = '0.6';
+        mbtiBtn.style.cursor = 'not-allowed';
+        mbtiDesc.innerHTML = `已完成 ${mbtiCount}/3 次 - <span style="color: #ef4444;">已达上限</span>`;
+      } else {
+        mbtiBtn.style.opacity = '1';
+        mbtiBtn.style.cursor = 'pointer';
+        mbtiDesc.innerHTML = `了解你的人格特质与行为倾向<br><small style="color: #6b7280;">剩余 ${mbtiRemaining} 次机会</small>`;
       }
-      document.body.style.overflow = '';
-      // 移除键盘事件监听器
-      document.removeEventListener('keydown', handleKeydown);
-    }, 300); 
-  };
-
-  // 处理键盘事件的函数
-  const handleKeydown = (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault(); // 防止默认行为
-      okButton.click();
     }
-  };
-
-  // 添加键盘事件监听器
-  document.addEventListener('keydown', handleKeydown);
-
-  okButton.addEventListener('click', closeAlert);
-
-  // 点击模态窗口外部关闭
-  alertModal.addEventListener('click', (e) => {
-    if (e.target === alertModal) {
-      closeAlert();
+  }
+  
+  if (careerBtn) {
+    const careerDesc = careerBtn.querySelector('.test-desc');
+    
+    if (isDeveloperMode) {
+      // 开发者模式显示无限制
+      careerBtn.style.opacity = '1';
+      careerBtn.style.cursor = 'pointer';
+      careerDesc.innerHTML = `发现适合你的职业发展方向<br><small style="color: #10b981;">开发者模式 - 无限制</small>`;
+    } else {
+      const careerCount = counts.career_count || 0;
+      const careerRemaining = Math.max(0, 3 - careerCount);
+      
+      if (careerCount >= 3) {
+        careerBtn.style.opacity = '0.6';
+        careerBtn.style.cursor = 'not-allowed';
+        careerDesc.innerHTML = `已完成 ${careerCount}/3 次 - <span style="color: #ef4444;">已达上限</span>`;
+      } else {
+        careerBtn.style.opacity = '1';
+        careerBtn.style.cursor = 'pointer';
+        careerDesc.innerHTML = `发现适合你的职业发展方向<br><small style="color: #6b7280;">剩余 ${careerRemaining} 次机会</small>`;
+      }
     }
-  });
+  }
 }

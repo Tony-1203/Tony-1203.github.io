@@ -972,9 +972,6 @@ h2 {
   font-style: italic;
 }
 
-/* 在你的 CSS 文件中添加以下样式 */
-
-/* 自定义输入模态框样式 */
 .custom-prompt-modal {
   position: fixed;
   top: 0;

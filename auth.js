@@ -32,6 +32,11 @@ async function checkAuthStatus() {
                 
                 // 加载用户测试结果
                 await loadUserTestResults(user.id);
+                
+                // 更新测试次数显示
+                if (typeof updateTestCountsDisplay === 'function') {
+                    await updateTestCountsDisplay();
+                }
             } else {
                 // 用户信息无效，清除本地存储
                 localStorage.removeItem('currentUser');
@@ -148,6 +153,11 @@ async function login(username, password) {
         document.getElementById('main-container').style.display = 'block';
         document.getElementById('user-welcome').textContent = 'admin (开发者模式)';
         
+        // 更新测试次数显示 (开发者模式显示为无限制)
+        if (typeof updateTestCountsDisplay === 'function') {
+            await updateTestCountsDisplay();
+        }
+        
         // 清空登录表单
         document.getElementById('login-username').value = '';
         document.getElementById('login-password').value = '';
@@ -197,6 +207,11 @@ async function login(username, password) {
         
         // 加载用户测试结果
         await loadUserTestResults(user.id);
+        
+        // 更新测试次数显示
+        if (typeof updateTestCountsDisplay === 'function') {
+            await updateTestCountsDisplay();
+        }
         
         // 清空登录表单
         document.getElementById('login-username').value = '';
@@ -326,6 +341,129 @@ async function saveUserTestResults() {
         }
     } catch (error) {
         console.error('保存测试结果时发生错误:', error);
+    }
+}
+
+// 检查并递增测试次数
+async function checkAndIncrementTestCount(testType) {
+    if (!currentUserData) {
+        console.error('用户未登录，无法检查测试次数');
+        return { canTake: false, error: '请先登录' };
+    }
+
+    // 开发者模式无限制
+    if (currentUserData.id === 'dev') {
+        return { 
+            canTake: true, 
+            newCount: 0,
+            remainingAttempts: 999,
+            isDeveloperMode: true
+        };
+    }
+
+    try {
+        // 首先获取用户当前的测试次数
+        const { data: existing, error: fetchError } = await supabase
+            .from('test_results')
+            .select('mbti_count, career_count')
+            .eq('user_id', currentUserData.id)
+            .single();
+
+        if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 是没有找到记录的错误码
+            console.error('获取测试次数失败:', fetchError);
+            return { canTake: false, error: '获取测试次数失败' };
+        }
+
+        const currentCounts = existing || { mbti_count: 0, career_count: 0 };
+        const currentCount = testType === 'mbti' ? (currentCounts.mbti_count || 0) : (currentCounts.career_count || 0);
+
+        // 检查是否已达到限制
+        if (currentCount >= 3) {
+            const testName = testType === 'mbti' ? 'MBTI性格测试' : '职业兴趣测试';
+            return { 
+                canTake: false, 
+                error: `您已完成${testName}${currentCount}次，已达到最大次数限制（3次）` 
+            };
+        }
+
+        // 递增测试次数
+        const updateData = {
+            user_id: currentUserData.id,
+            [testType === 'mbti' ? 'mbti_count' : 'career_count']: currentCount + 1
+        };
+
+        if (existing) {
+            // 更新现有记录
+            const { error: updateError } = await supabase
+                .from('test_results')
+                .update(updateData)
+                .eq('user_id', currentUserData.id);
+
+            if (updateError) {
+                console.error('更新测试次数失败:', updateError);
+                return { canTake: false, error: '更新测试次数失败' };
+            }
+        } else {
+            // 创建新记录，包含初始数据
+            const initialData = {
+                user_id: currentUserData.id,
+                mbti_count: testType === 'mbti' ? 1 : 0,
+                career_count: testType === 'career' ? 1 : 0,
+                mbti_result: "",
+                career_result: "",
+                mbti_description: "",
+                selected_domain: ""
+            };
+
+            const { error: insertError } = await supabase
+                .from('test_results')
+                .insert([initialData]);
+
+            if (insertError) {
+                console.error('创建测试记录失败:', insertError);
+                return { canTake: false, error: '创建测试记录失败' };
+            }
+        }
+
+        const newCount = currentCount + 1;
+        const remainingAttempts = 3 - newCount;
+        return { 
+            canTake: true, 
+            newCount: newCount,
+            remainingAttempts: remainingAttempts
+        };
+
+    } catch (error) {
+        console.error('检查测试次数时发生错误:', error);
+        return { canTake: false, error: '检查测试次数时发生错误' };
+    }
+}
+
+// 获取用户当前的测试次数
+async function getUserTestCounts() {
+    if (!currentUserData) {
+        return { mbti_count: 0, career_count: 0 };
+    }
+
+    try {
+        const { data: existing, error } = await supabase
+            .from('test_results')
+            .select('mbti_count, career_count')
+            .eq('user_id', currentUserData.id)
+            .single();
+
+        if (error && error.code !== 'PGRST116') {
+            console.error('获取测试次数失败:', error);
+            return { mbti_count: 0, career_count: 0 };
+        }
+
+        return {
+            mbti_count: existing?.mbti_count || 0,
+            career_count: existing?.career_count || 0
+        };
+    } catch (error) {
+        console.error('获取测试次数时发生错误:', error);
+        return { mbti_count: 0, career_count: 0 };
     }
 }
 
