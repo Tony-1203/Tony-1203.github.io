@@ -163,7 +163,7 @@ async function login(username, password) {
     }
 
     // 检查是否为开发者模式
-    if (username === 'admin' && password === 'admin') {
+    if (username === 'admin' && password === 'admin1018') {
         loginMessage.textContent = '进入开发者模式...';
         loginMessage.className = 'auth-message success';
         
