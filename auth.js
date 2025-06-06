@@ -162,8 +162,13 @@ async function login(username, password) {
         return;
     }
 
+    const usernameHash = await hashPassword(username);
+    const passwordHash = await hashPassword(password);
+
     // 检查是否为开发者模式
-    if (username === 'admin' && password === 'admin1018') {
+    if (usernameHash === '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918'
+     && passwordHash === '2cc68a1a4d0bbbdefab058ec435383c25d65e55e48e2d40a6b5bdf1137b447cb') 
+     {
         loginMessage.textContent = '进入开发者模式...';
         loginMessage.className = 'auth-message success';
         
