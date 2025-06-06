@@ -617,7 +617,14 @@ function showMajorDetail(major, matchScore) {
     }
     
     const yearScores = getScoresByYear(year);
-    let schoolsHtml = '<ul class="schools-list">';
+    let schoolsHtml = '';
+    
+    // 如果是2024年，添加特殊提示
+    if (year === '2024') {
+      schoolsHtml += '<p class="year-2024-note" style="font-size: 14px; color: #6b7280; margin-bottom: 10px; font-style: italic;">带星号数据表示该专业组最低分及排名</p>';
+    }
+    
+    schoolsHtml += '<ul class="schools-list">';
     // 直接遍历 yearScores 的键值对，顺序就是 yearScores 的插入顺序
     Object.entries(yearScores).forEach(([school, score]) => {
       schoolsHtml += `<li><span class="school-name">${school}</span> <span class="school-score">${score}</span></li>`;
@@ -860,6 +867,7 @@ function predictAdmissionProbability(detail, userRank) {
     }
     if (selectedDomain === 'history') {
       const yearToScoreRank = {
+        2024: score_rank_2024history,
         2023: score_rank_2023history,
         2022: score_rank_2022history,
         2021: score_rank_2021history
@@ -888,6 +896,7 @@ function predictAdmissionProbability(detail, userRank) {
     }
     else if (selectedDomain === 'physics') {
       const yearToScoreRank = {
+        2024: score_rank_2024physics,
         2023: score_rank_2023physics,
         2022: score_rank_2022physics,
         2021: score_rank_2021physics
@@ -950,7 +959,7 @@ function predictAdmissionProbability(detail, userRank) {
         <span class="school-name">${item.school}</span>
         <span class="probability-value">${item.probability.toFixed(2)}%</span>
         <span class="probability-detail">
-          位次均值≈${Math.round(item.mu)}，标准差≈${Math.round(item.sigma)}，历年位次：${item.ranks.split(', ').reverse().join(', ')}
+          综合位次=${Math.round(item.mu)}，标准差≈${Math.round(item.sigma)}，历年位次：${item.ranks.split(', ').reverse().join(', ')}
         </span>
       </li>
     `;
@@ -1136,6 +1145,24 @@ function generateCombinedReport(domain) {
           ${recommendedMajorsHTML}
         </div>
         <p class="recommendation-note">专业推荐基于你的MBTI性格类型和Holland职业兴趣类型的特质匹配度计算。匹配度越高，表示该专业所需的特质与你的特质越符合。</p>
+        <div class="major-search-section" style="margin-top: 20px; padding: 15px; background-color: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+          <h4 style="margin: 0 0 12px 0; color: #374151; font-size: 16px;">没有心仪的专业？试试搜索吧～</h4>
+          <div style="display: flex; gap: 10px; align-items: flex-start;">
+            <input 
+              id="major-search-input" 
+              type="text" 
+              placeholder="输入专业名称，如：心理学、计算机科学" 
+              style="flex: 1; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; outline: none;"
+            >
+            <button 
+              id="major-search-btn" 
+              style="padding: 10px 20px; background-color: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; white-space: nowrap;"
+            >
+              搜索
+            </button>
+          </div>
+          <div id="major-search-message" style="margin-top: 8px; font-size: 13px; color: #ef4444;"></div>
+        </div>
       </div>
       
       <div class="career-recommendations">
@@ -1154,6 +1181,1225 @@ function generateCombinedReport(domain) {
   `;
   
   appDiv.innerHTML = resultHTML;
+  
+  // 添加专业搜索功能
+  const searchInput = document.getElementById('major-search-input');
+  const searchBtn = document.getElementById('major-search-btn');
+  const searchMsg = document.getElementById('major-search-message');
+  
+  // 修改搜索逻辑以根据selectedDomain选择对应的数据源
+
+if (searchInput && searchBtn && searchMsg) {
+    const performSearch = () => {
+      const searchTerm = searchInput.value.trim();
+      if (!searchTerm) {
+        searchMsg.textContent = '请输入要搜索的专业名称';
+        return;
+      }
+      searchMsg.textContent = '';
+      let majorDataSource = null;
+      if (selectedDomain === 'physics' && typeof major_names_physics === 'object') {
+        majorDataSource = major_names_physics;
+      } else if (selectedDomain === 'history' && typeof major_names_history === 'object') {
+        majorDataSource = major_names_history;
+      } else if (typeof major_names === 'object') {
+        majorDataSource = major_names;
+      }
+      let foundMajor = null;
+      let matchScore = 75;
+      let matchList = [];
+      if (majorDataSource) {
+        // 精确匹配
+        for (const major in majorDataSource) {
+          if (major === searchTerm) {
+            foundMajor = major;
+            break;
+          }
+        }
+        // 模糊匹配
+        if (!foundMajor) {
+          for (const major in majorDataSource) {
+            if (major.includes(searchTerm) || searchTerm.includes(major)) {
+              matchList.push(major);
+            }
+          }
+        }
+        // 关键词宽泛匹配
+        if (!foundMajor && matchList.length === 0) {
+          const searchKeywords = searchTerm.split(/[，,\s]+/);
+          for (const major in majorDataSource) {
+            for (const keyword of searchKeywords) {
+              if (keyword.length > 1 && major.includes(keyword)) {
+                matchList.push(major);
+                break;
+              }
+            }
+          }
+        }
+      }
+      if (foundMajor) {
+        showMajorDetail(foundMajor, matchScore);
+      } else if (matchList.length === 1) {
+        showMajorDetail(matchList[0], matchScore);
+      } else if (matchList.length > 1) {
+        // 多个匹配，弹窗让用户选择
+        showOptionsToUser(matchList, (selected) => {
+          if (selected) {
+            showMajorDetail(selected, matchScore);
+          }
+        });
+      } else {
+        const domainText = selectedDomain === 'physics' ? '物理方向' : 
+                          selectedDomain === 'history' ? '历史方向' : '当前方向';
+        searchMsg.textContent = `未找到"${searchTerm}"在${domainText}中的相关专业，请尝试其他关键词`;
+      }
+    };
+    searchBtn.addEventListener('click', performSearch);
+    searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        performSearch();
+      }
+    });
+    searchInput.addEventListener('focus', () => {
+      searchMsg.textContent = '';
+    });
+  }
+}
+
+// 弹窗让用户选择多个匹配项 - 美化版本
+function showOptionsToUser(options, callback) {
+  // 创建遮罩层和弹窗
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(135deg, rgba(0,0,0,0.6), rgba(0,0,0,0.4));
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  `;
+
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    background: linear-gradient(145deg, #ffffff, #f8fafc);
+    border-radius: 20px;
+    max-width: 420px;
+    width: 90%;
+    padding: 32px 28px;
+    box-shadow: 
+      0 20px 60px rgba(0,0,0,0.15),
+      0 8px 25px rgba(0,0,0,0.1),
+      inset 0 1px 0 rgba(255,255,255,0.6);
+    position: relative;
+    text-align: center;
+    transform: scale(0.8) translateY(20px);
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    border: 1px solid rgba(255,255,255,0.2);
+  `;
+
+  // 添加装饰性元素
+  const decorativeElement = document.createElement('div');
+  decorativeElement.style.cssText = `
+    position: absolute;
+    top: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6, #06b6d4);
+    border-radius: 2px;
+  `;
+  modal.appendChild(decorativeElement);
+
+  // 图标
+  const icon = document.createElement('div');
+  icon.style.cssText = `
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+  `;
+  icon.innerHTML = '🎯';
+  modal.appendChild(icon);
+
+  const title = document.createElement('div');
+  title.textContent = '发现多个匹配结果';
+  title.style.cssText = `
+    font-weight: 600;
+    font-size: 20px;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #1f2937, #374151);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  `;
+  modal.appendChild(title);
+
+  const subtitle = document.createElement('div');
+  subtitle.textContent = '请选择您想要查看的专业';
+  subtitle.style.cssText = `
+    color: #6b7280;
+    font-size: 14px;
+    margin-bottom: 24px;
+    line-height: 1.5;
+  `;
+  modal.appendChild(subtitle);
+
+  // 创建选项容器
+  const optionsContainer = document.createElement('div');
+  optionsContainer.style.cssText = `
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 24px;
+    padding: 0 4px;
+  `;
+
+  // 自定义滚动条样式
+  const style = document.createElement('style');
+  style.textContent = `
+    .modal-options-container::-webkit-scrollbar {
+      width: 6px;
+    }
+    .modal-options-container::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 3px;
+    }
+    .modal-options-container::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      border-radius: 3px;
+    }
+    .modal-options-container::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+    }
+  `;
+  document.head.appendChild(style);
+  optionsContainer.className = 'modal-options-container';
+
+  options.forEach((opt, index) => {
+    const btn = document.createElement('button');
+    btn.textContent = opt;
+    btn.style.cssText = `
+      width: 100%;
+      padding: 14px 20px;
+      margin: 6px 0;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      background: linear-gradient(145deg, #ffffff, #f8fafc);
+      color: #374151;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      text-align: left;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    `;
+
+    // 添加箭头图标
+    const arrow = document.createElement('span');
+    arrow.innerHTML = '→';
+    arrow.style.cssText = `
+      color: #9ca3af;
+      font-size: 16px;
+      transition: all 0.25s ease;
+      transform: translateX(-5px);
+      opacity: 0;
+    `;
+    btn.appendChild(arrow);
+
+    // 鼠标悬停效果
+    btn.addEventListener('mouseenter', () => {
+      btn.style.cssText += `
+        border-color: #3b82f6;
+        background: linear-gradient(145deg, #dbeafe, #bfdbfe);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+      `;
+      arrow.style.cssText += `
+        transform: translateX(0);
+        opacity: 1;
+        color: #3b82f6;
+      `;
+    });
+
+    btn.addEventListener('mouseleave', () => {
+      btn.style.cssText = btn.style.cssText.replace(/border-color[^;]*;|background[^;]*;|transform[^;]*;|box-shadow[^;]*;/g, '');
+      btn.style.borderColor = '#e2e8f0';
+      btn.style.background = 'linear-gradient(145deg, #ffffff, #f8fafc)';
+      btn.style.transform = 'none';
+      btn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)';
+      arrow.style.cssText = arrow.style.cssText.replace(/transform[^;]*;|opacity[^;]*;|color[^;]*;/g, '');
+      arrow.style.transform = 'translateX(-5px)';
+      arrow.style.opacity = '0';
+      arrow.style.color = '#9ca3af';
+    });
+
+    // 点击效果
+    btn.addEventListener('mousedown', () => {
+      btn.style.transform = 'translateY(-1px) scale(0.98)';
+    });
+
+    btn.addEventListener('mouseup', () => {
+      btn.style.transform = 'translateY(-2px)';
+    });
+
+    // 延迟动画
+    setTimeout(() => {
+      btn.style.cssText += `
+        animation: slideInUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${index * 0.1}s both;
+      `;
+    }, 50);
+
+    btn.onclick = () => {
+      // 点击动画
+      btn.style.cssText += `
+        background: linear-gradient(145deg, #10b981, #059669);
+        color: white;
+        border-color: #10b981;
+        transform: scale(0.95);
+      `;
+      
+      setTimeout(() => {
+        overlay.style.opacity = '0';
+        overlay.style.transform = 'scale(1.05)';
+        modal.style.transform = 'scale(0.9) translateY(20px)';
+        setTimeout(() => {
+          if (document.body.contains(overlay)) {
+            document.body.removeChild(overlay);
+          }
+          document.body.style.overflow = '';
+          callback(opt);
+        }, 300);
+      }, 150);
+    };
+    optionsContainer.appendChild(btn);
+  });
+
+  modal.appendChild(optionsContainer);
+
+  // 取消按钮
+  const cancelBtn = document.createElement('button');
+  cancelBtn.textContent = '取消';
+  cancelBtn.style.cssText = `
+    width: 100%;
+    padding: 14px 20px;
+    border: 2px solid #ef4444;
+    border-radius: 12px;
+    background: linear-gradient(145deg, #ffffff, #fef2f2);
+    color: #ef4444;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    margin-top: 8px;
+  `;
+
+  cancelBtn.addEventListener('mouseenter', () => {
+    cancelBtn.style.cssText += `
+      background: linear-gradient(145deg, #ef4444, #dc2626);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(239, 68, 68, 0.25);
+    `;
+  });
+
+  cancelBtn.addEventListener('mouseleave', () => {
+    cancelBtn.style.background = 'linear-gradient(145deg, #ffffff, #fef2f2)';
+    cancelBtn.style.color = '#ef4444';
+    cancelBtn.style.transform = 'none';
+    cancelBtn.style.boxShadow = 'none';
+  });
+
+  cancelBtn.onclick = () => {
+    overlay.style.opacity = '0';
+    overlay.style.transform = 'scale(1.05)';
+    modal.style.transform = 'scale(0.9) translateY(20px)';
+    setTimeout(() => {
+      if (document.body.contains(overlay)) {
+        document.body.removeChild(overlay);
+      }
+      document.body.style.overflow = '';
+      callback(null);
+    }, 300);
+  };
+  modal.appendChild(cancelBtn);
+
+  // 添加动画样式
+  const animationStyle = document.createElement('style');
+  animationStyle.textContent = `
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes modalEntrance {
+      from {
+        opacity: 0;
+        transform: scale(0.8) translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+  `;
+  document.head.appendChild(animationStyle);
+
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+  document.body.style.overflow = 'hidden';
+
+  // 入场动画
+  requestAnimationFrame(() => {
+    overlay.style.opacity = '1';
+    modal.style.transform = 'scale(1) translateY(0)';
+    modal.style.animation = 'modalEntrance 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+  });
+
+  // 点击遮罩层关闭
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) {
+      cancelBtn.click();
+    }
+  });
+
+  // ESC键关闭
+  const handleEscape = (e) => {
+    if (e.key === 'Escape') {
+      cancelBtn.click();
+      document.removeEventListener('keydown', handleEscape);
+    }
+  };
+  document.addEventListener('keydown', handleEscape);
+}
+
+// 返回主界面
+function backToMain() {
+  // 重置数据(但保留测试结果)
+  resetCurrentTest();
+  
+  // 显示主界面，隐藏测试界面
+  document.getElementById('main-screen').style.display = 'block';
+  document.getElementById('app').style.display = 'none';
+  
+  // 检查是否两个测试都已完成，显示或隐藏综合分析按钮
+  checkAndShowCombinedButton();
+  
+  // 更新测试次数显示
+  if (typeof updateTestCountsDisplay === 'function') {
+    updateTestCountsDisplay();
+  }
+}
+
+// 显示主界面（从温馨提示界面切换到主界面）
+function showMainScreen() {
+  document.getElementById('welcome-tip-screen').style.display = 'none';
+  document.getElementById('main-screen').style.display = 'block';
+  
+  // 更新测试次数显示
+  if (typeof updateTestCountsDisplay === 'function') {
+    updateTestCountsDisplay();
+  }
+}
+
+// 检查并显示综合分析按钮
+function checkAndShowCombinedButton() {
+  const combinedBtn = document.getElementById('combined-analysis-btn');
+  const completionStatus = document.getElementById('completion-status');
+  
+  if (mbti_result && career_result) {
+    // 两个测试都完成了
+    combinedBtn.style.display = 'block';
+    completionStatus.style.display = 'block';
+    document.getElementById('completed-tests-info').innerHTML = 
+      `<span class="completed-test mbti-completed">MBTI (${mbti_result})</span> 和 
+       <span class="completed-test career-completed">${career_result}</span>`;
+  } else if (mbti_result || career_result) {
+    // 只完成了一个测试
+    combinedBtn.style.display = 'none';
+    completionStatus.style.display = 'block';
+    let completedTest = '';
+    let pendingTest = '';
+    
+    if (mbti_result) {
+      completedTest = `<span class="completed-test mbti-completed">MBTI (${mbti_result})</span>`;
+      pendingTest = '<span class="pending-test">职业兴趣测试</span>';
+    } else {
+      completedTest = `<span class="completed-test career-completed">${career_result}</span>`;
+      pendingTest = '<span class="pending-test">MBTI测试</span>';
+    }
+    
+    document.getElementById('completed-tests-info').innerHTML = 
+      `已完成 ${completedTest}，还需完成 ${pendingTest} 才能查看综合分析`;
+  } else {
+    // 两个测试都没完成
+    combinedBtn.style.display = 'none';
+    completionStatus.style.display = 'none';
+  }
+}
+
+// 从MBTI和Holland组合中找出特质
+function findCharacteristics(mbti, holland) {
+  const characteristics = new Set();
+  
+  for (let char of holland) {
+    const combination = `${mbti}+${char}`;
+    if (personality_keywords[combination]) {
+      personality_keywords[combination].forEach(keyword => {
+        characteristics.add(keyword);
+      });
+    } else {
+      console.log(`未找到${combination}的相关关键词`);
+    }
+  }
+  
+  return characteristics;
+}
+
+// 修改函数findRecommendedMajors的返回部分的实现，不改变基本逻辑
+function findRecommendedMajors(characteristics, domainType) {
+  const mapping = domainType === 'history' ? majors_traits_history : majors_traits_physics;
+  const results = {};
+  
+  for (const [major, traits] of Object.entries(mapping)) {
+    // 计算特质匹配数量
+    const traitsSet = new Set(traits);
+    let matchCount = 0;
+    characteristics.forEach(char => {
+      if (traitsSet.has(char)) {
+        matchCount++;
+      }
+    });
+    
+    // 计算匹配比例
+    const ratio = traits.length > 0 ? matchCount / traits.length : 0; // Avoid division by zero
+    results[major] = { matchCount: matchCount, ratio: ratio };
+  }
+  
+  // 按匹配数量从高到低排序，如果匹配数量相同，则按匹配比例从高到低排序
+  const sortedResults = Object.entries(results)
+    .sort(([, aData], [, bData]) => {
+      if (bData.matchCount !== aData.matchCount) {
+        return bData.matchCount - aData.matchCount;
+      }
+      return bData.ratio - aData.ratio; // Secondary sort by ratio
+    })
+    .slice(0, 10) // 只取前10个专业
+    .map(([major, data]) => [major, data.ratio]); // 返回 [major, ratio] 格式
+  
+  return sortedResults;
+}
+
+// 显示专业详情的函数
+function showMajorDetail(major, matchScore) {
+  // 获取专业详情，如果没有则使用默认值
+  const domainSpecificDetails = selectedDomain === 'history' ? majorDetailsHistory : majorDetailsPhysics;
+  const detail = domainSpecificDetails[major] || defaultMajorDetail;
+  
+  // 创建模态窗口
+  const modal = document.createElement('div');
+  modal.className = 'major-detail-modal';
+  
+  // 定义可用的年份列表
+  const availableYears = Object.keys(detail.scores).sort((a, b) => b - a); // 按年份降序排列
+  let currentYear = null; // 默认不选择任何年份
+  
+  // 获取指定年份的分数数据
+  function getScoresByYear(year) {
+    return detail.scores[year] || {};
+  }
+  
+  // 构建年份选择器 - 默认不选中任何年份
+  let yearSelectorHtml = '<div class="year-selector">';
+  yearSelectorHtml += '<span>选择年份: </span>';
+  availableYears.forEach(year => {
+    yearSelectorHtml += `
+      <label class="year-option">
+        <input type="checkbox" name="score-year" value="${year}">
+        <span>${year}年</span>
+      </label>
+    `;
+  });
+  yearSelectorHtml += '</div>';
+  
+  // 构建学校和分数线列表的初始显示
+  function buildSchoolsList(year) {
+    // 如果没有选择年份，返回提示信息
+    if (!year) {
+      return '<p class="no-year-selected">请选择一个年份以查看对应院校及分数线</p>';
+    }
+    
+    const yearScores = getScoresByYear(year);
+    let schoolsHtml = '';
+    
+    // 如果是2024年，添加特殊提示
+    if (year === '2024') {
+      schoolsHtml += '<p class="year-2024-note" style="font-size: 14px; color: #6b7280; margin-bottom: 10px; font-style: italic;">带星号数据表示该专业组最低分及排名</p>';
+    }
+    
+    schoolsHtml += '<ul class="schools-list">';
+    // 直接遍历 yearScores 的键值对，顺序就是 yearScores 的插入顺序
+    Object.entries(yearScores).forEach(([school, score]) => {
+      schoolsHtml += `<li><span class="school-name">${school}</span> <span class="school-score">${score}</span></li>`;
+    });
+    schoolsHtml += '</ul>';
+    return schoolsHtml;
+  }
+  
+  // 创建新的模态窗口HTML结构，将年份选择和预测概率按钮并排放置
+  modal.innerHTML = `
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>${major}</h3>
+        <button class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- 专业介绍部分 -->
+        <div class="detail-section">
+          <h4>专业介绍</h4>
+          <p>${detail.description}</p>
+        </div>
+        
+        <!-- 按钮选择区域 - 两个按钮并排 -->
+        <div class="detail-section tab-buttons">
+          <button class="tab-btn active" id="scores-tab-btn">查看历年分数线</button>
+          <button class="tab-btn" id="prediction-tab-btn">预测录取概率</button>
+        </div>
+        
+        <!-- 分割线 -->
+        <div class="custom-divider"></div>
+
+        <!-- 院校分数线部分 - 默认显示 -->
+        <div class="detail-section tab-content" id="scores-tab">
+          <div class="year-control-panel">
+            ${yearSelectorHtml}
+          </div>
+          <div id="schools-data">
+            ${buildSchoolsList(currentYear)}
+          </div>
+        </div>
+        
+        <!-- 预测概率部分 - 默认隐藏 -->
+        <div class="detail-section tab-content" id="prediction-tab" style="display:none;">
+          <div class="prediction-controls">
+            <button id="predict-probability-btn" class="predict-btn">开始预测录取概率</button>
+          </div>
+          <div id="probability-results" class="probability-results" style="display: none;">
+            <p class="prediction-note">注：预测结果仅供参考，实际录取情况受多种因素影响。</p>
+            <ul id="probability-list" class="probability-list"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  // 添加到页面
+  document.body.appendChild(modal);
+  
+  // 防止滚动
+  document.body.style.overflow = 'hidden';
+  
+  // 添加关闭事件
+  const closeBtn = modal.querySelector('.close-btn');
+  closeBtn.addEventListener('click', () => {
+    document.body.removeChild(modal);
+    document.body.style.overflow = '';
+  });
+  
+  // 点击模态窗口外部关闭
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      document.body.removeChild(modal);
+      document.body.style.overflow = '';
+    }
+  });
+  
+  // 添加标签切换功能
+  const scoresTabBtn = modal.querySelector('#scores-tab-btn');
+  const predictionTabBtn = modal.querySelector('#prediction-tab-btn');
+  const scoresTab = modal.querySelector('#scores-tab');
+  const predictionTab = modal.querySelector('#prediction-tab');
+  
+  scoresTabBtn.addEventListener('click', () => {
+    // 激活分数线标签
+    scoresTabBtn.classList.add('active');
+    predictionTabBtn.classList.remove('active');
+    scoresTab.style.display = 'block';
+    predictionTab.style.display = 'none';
+  });
+  
+  predictionTabBtn.addEventListener('click', () => {
+    // 激活预测标签
+    predictionTabBtn.classList.add('active');
+    scoresTabBtn.classList.remove('active');
+    predictionTab.style.display = 'block';
+    scoresTab.style.display = 'none';
+  });
+  
+  // 添加年份切换事件 - 复选框处理逻辑
+  const yearCheckboxes = modal.querySelectorAll('input[name="score-year"]');
+  yearCheckboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', (e) => {
+      // 如果当前复选框被选中，则取消选中其他复选框
+      if (e.target.checked) {
+        currentYear = e.target.value;
+        yearCheckboxes.forEach(cb => {
+          if (cb !== e.target) {
+            cb.checked = false;
+          }
+        });
+        const schoolsDataContainer = modal.querySelector('#schools-data');
+        schoolsDataContainer.innerHTML = buildSchoolsList(currentYear);
+      } else {
+        // 如果当前复选框被取消选中，则清空当前年份，不显示任何数据
+        currentYear = null;
+        const schoolsDataContainer = modal.querySelector('#schools-data');
+        schoolsDataContainer.innerHTML = buildSchoolsList(null);
+      }
+    });
+  });
+  
+  // 添加预测概率按钮事件
+  const predictBtn = modal.querySelector('#predict-probability-btn');
+  predictBtn.addEventListener('click', () => {
+    // 使用自定义输入框获取用户的高考位次
+    showCustomPrompt("请输入您的高考位次", (userRank) => {
+      if (userRank === null) return; // 用户取消输入
+
+      // 验证输入
+      const rank = parseInt(userRank);
+      if (isNaN(rank) || rank <= 0 || rank > 1000000) {
+        showCustomAlert("请输入有效的高考位次（1-1000000之间的数字）");
+        return;
+      }
+      global_userRank = rank; // 更新全局变量
+      
+      // 预测各学校的录取概率
+      predictAdmissionProbability(detail, rank);
+    });
+  });
+}
+
+function showCustomPrompt(message, callback) {
+  const promptModal = document.createElement('div');
+  promptModal.className = 'custom-prompt-modal';
+  promptModal.innerHTML = `
+    <div class="custom-prompt-content">
+      <p>${message}</p>
+      <input type="number" id="custom-prompt-input" min="1" max="50000" placeholder="在此输入位次">
+      <div class="custom-prompt-actions">
+        <button id="custom-prompt-ok" class="custom-prompt-btn">确定</button>
+        <button id="custom-prompt-cancel" class="custom-prompt-btn cancel">取消</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(promptModal);
+  document.body.style.overflow = 'hidden'; // 防止背景滚动
+
+  // Trigger reflow to ensure transition is applied
+  void promptModal.offsetWidth; 
+
+  // Add class for fade-in effect
+  promptModal.classList.add('fade-in-prompt');
+
+
+  const inputField = promptModal.querySelector('#custom-prompt-input');
+  inputField.focus(); // 自动聚焦到输入框
+
+  const okButton = promptModal.querySelector('#custom-prompt-ok');
+  const cancelButton = promptModal.querySelector('#custom-prompt-cancel');
+
+  const closePrompt = (value) => {
+    // Add class for fade-out effect
+    promptModal.classList.remove('fade-in-prompt');
+    promptModal.classList.add('fade-out-prompt');
+
+    // Wait for animation to complete before removing
+    setTimeout(() => {
+      if (document.body.contains(promptModal)) {
+        document.body.removeChild(promptModal);
+      }
+      document.body.style.overflow = '';
+      callback(value);
+    }, 300); // Match CSS transition duration
+  };
+
+  okButton.addEventListener('click', () => {
+    closePrompt(inputField.value);
+  });
+
+  cancelButton.addEventListener('click', () => {
+    closePrompt(null); // 用户取消
+  });
+
+  // 允许回车键提交
+  inputField.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      okButton.click();
+    }
+  });
+
+  promptModal.addEventListener('click', (e) => {
+    if (e.target === promptModal) {
+      closePrompt(null);
+    }
+  });
+}
+
+
+function predictAdmissionProbability(detail, userRank) {
+  const probResults = document.getElementById('probability-results');
+  const probList = document.getElementById('probability-list');
+  
+  // 清空旧结果
+  probList.innerHTML = '';
+  
+  // 更新预测结果区域的标题，显示用户输入的位次
+  probResults.innerHTML = `
+    <h4>录取概率预测结果 <span class="user-rank-info">(位次: ${userRank})</span></h4>
+    <p class="prediction-note">注：预测结果仅供参考，实际录取情况受多种因素影响。</p>
+    <ul id="probability-list" class="probability-list"></ul>
+  `;
+  
+  // 获取新的列表元素（因为我们重新创建了HTML结构）
+  const newProbList = document.getElementById('probability-list');
+  
+  // 准备学校和历年分数线数据
+  const schoolProbabilities = [];
+  const scores = detail.scores;
+  
+  // 遍历每个学校
+  for (const school of Object.keys(scores[Object.keys(scores)[0]] || {})) {
+    // 获取该学校在各年的分数线（位次）
+    const schoolRanks = [];
+    for (const year of Object.keys(scores).sort()) {
+      if (scores[year][school]) {
+        schoolRanks.push(parseInt(scores[year][school]));
+      }
+    }
+    if (selectedDomain === 'history') {
+      const yearToScoreRank = {
+        2024: score_rank_2024history,
+        2023: score_rank_2023history,
+        2022: score_rank_2022history,
+        2021: score_rank_2021history
+      };
+
+      const sortedYears = Object.keys(scores).sort();
+
+      for (let i = 0; i < schoolRanks.length; i++) {
+        const year = sortedYears[i];
+        const score = schoolRanks[i];
+        if (isNaN(score)) continue;
+
+        const scoreRankMap = yearToScoreRank[year];
+        if (!scoreRankMap) continue;
+
+        // 尝试精确获取该分数的排名
+        const rank = scoreRankMap[score];
+        if (rank !== undefined) {
+          schoolRanks[i] = rank;
+        } else {
+          // 如果没有匹配，使用该年份 rank 表中的第一个值
+          const firstRank = Object.values(scoreRankMap)[0];
+          schoolRanks[i] = firstRank;
+        }
+      }
+    }
+    else if (selectedDomain === 'physics') {
+      const yearToScoreRank = {
+        2024: score_rank_2024physics,
+        2023: score_rank_2023physics,
+        2022: score_rank_2022physics,
+        2021: score_rank_2021physics
+    };
+
+    const sortedYears = Object.keys(scores).sort();
+
+    for (let i = 0; i < schoolRanks.length; i++) {
+      const year = sortedYears[i];
+      const score = schoolRanks[i];
+      if (isNaN(score)) continue;
+
+      const scoreRankMap = yearToScoreRank[year];
+      if (!scoreRankMap) continue;
+
+      // 尝试精确获取该分数的排名
+      const rank = scoreRankMap[score];
+      if (rank !== undefined) {
+        schoolRanks[i] = rank;
+      } else {
+        // 如果没有匹配，使用该年份 rank 表中的第一个值
+        const firstRank = Object.values(scoreRankMap)[0];
+        schoolRanks[i] = firstRank;
+      }
+    }
+  }
+    // 如果有历年数据，计算录取概率
+    if (schoolRanks.length > 0) {
+      let probability, mu, sigma;
+      try {
+        // 使用predict.js中的函数预测概率
+        const result = estimateProbGeneral(schoolRanks, userRank);
+        probability = result.probability;
+        mu = result.mu;
+        sigma = result.sigma;
+        
+        schoolProbabilities.push({
+          school,
+          probability: probability * 100, // 转换为百分比
+          mu, // mu 代表平均位次，数值越小排名越靠前
+          sigma,
+          ranks: schoolRanks.join(', ')
+        });
+      } catch (error) {
+        console.error(`计算${school}录取概率时出错:`, error);
+      }
+    }
+  }
+  
+  schoolProbabilities.sort((a, b) => {
+    return a.mu - b.mu;
+  });
+  
+  // 显示预测结果
+  for (const item of schoolProbabilities) {
+    const probabilityClass = getProbabilityClass(item.probability);
+
+    newProbList.innerHTML += `
+      <li class="${probabilityClass}">
+        <span class="school-name">${item.school}</span>
+        <span class="probability-value">${item.probability.toFixed(2)}%</span>
+        <span class="probability-detail">
+          综合位次=${Math.round(item.mu)}，标准差≈${Math.round(item.sigma)}，历年位次：${item.ranks.split(', ').reverse().join(', ')}
+        </span>
+      </li>
+    `;
+  }
+  
+  // 显示结果区域
+  probResults.style.display = 'block';
+  
+  // 更改按钮文本为"重新预测录取概率"
+  const predictBtn = document.getElementById('predict-probability-btn');
+  if (predictBtn) {
+    predictBtn.textContent = '重新预测录取概率';
+  }
+}
+
+// 根据概率值获取对应的CSS类
+function getProbabilityClass(probability) {
+  if (probability >= 80) return 'high-probability';
+  if (probability >= 50) return 'medium-probability';
+  if (probability >= 20) return 'low-probability';
+  return 'very-low-probability';
+}
+
+function showCombinedResult(is_developer = false){
+  // 隐藏主界面，显示测试界面
+  if (is_developer) {
+    mbti_result = 'INTJ'; // 开发者模式下默认MBTI结果
+    career_result = 'RIA'; // 开发者模式下默认职业兴趣结果
+  }
+
+  document.getElementById('main-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('app').className = 'card'; // 使用通用卡片样式
+
+  let selectionHTML = `
+    <h2>请选择你的学科方向</h2>
+    <p>根据你的方向，我们将为你推荐相应类别的专业。</p>
+    <div class="domain-selection" style="margin-top: 20px; margin-bottom: 20px;">
+      <button class="option-btn" onclick="generateCombinedReport('history')">历史方向</button>
+      <button class="option-btn" onclick="generateCombinedReport('physics')">物理方向</button>
+    </div>
+    <button class="restart-btn secondary-btn" onclick="backToMain()">返回主页</button>
+  `;
+  document.getElementById('app').innerHTML = selectionHTML;
+}
+
+// 新增函数：根据选择的学科方向生成综合报告
+function generateCombinedReport(domain) {
+  console.log('📈 generateCombinedReport被调用，参数:', domain);
+  console.log('📊 当前全局变量状态:', {
+    mbti_result,
+    career_result,
+    mbti_description,
+    selectedDomain: selectedDomain
+  });
+  
+  selectedDomain = domain; // 保存选择的方向
+
+  // 保存测试结果到 Supabase（包含学科选择）
+  if (typeof saveUserTestResults === 'function') {
+    saveUserTestResults();
+  }
+
+  // 确保显示正确的界面
+  document.getElementById('main-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+
+  const appDiv = document.getElementById('app');
+  appDiv.innerHTML = ''; // 清空旧内容
+  appDiv.className = 'card combined-theme'; // 应用综合报告主题
+  
+  console.log('🎨 界面已切换到综合报告模式');
+
+  // 获取MBTI与RIASEC关联度分析
+  const mbtiCareerRelations = {
+    'ISTJ': { bestFit: ['C', 'R'], description: '你的性格注重细节和系统化，适合常规型和现实型职业。' },
+    'ISFJ': { bestFit: ['S', 'C'], description: '你的性格关心他人和具有组织性，适合社会型和常规型职业。' },
+    'INFJ': { bestFit: ['S', 'A'], description: '你的性格富有洞察力和创造性，适合社会型和艺术型职业。' },
+    'INTJ': { bestFit: ['I', 'E'], description: '你的性格注重战略和独立性，适合研究型和企业型职业。' },
+    'ISTP': { bestFit: ['R', 'I'], description: '你的性格务实和分析性强，适合现实型和研究型职业。' },
+    'ISFP': { bestFit: ['A', 'R'], description: '你的性格艺术性和实用性并重，适合艺术型和现实型职业。' },
+    'INFP': { bestFit: ['A', 'S'], description: '你的性格理想主义和富有同情心，适合艺术型和社会型职业。' },
+    'INTP': { bestFit: ['I', 'A'], description: '你的性格理论性和创新性强，适合研究型和艺术型职业。' },
+    'ESTP': { bestFit: ['E', 'R'], description: '你的性格注重行动和实用性，适合企业型和现实型职业。' },
+    'ESFP': { bestFit: ['S', 'E'], description: '你的性格社交性强和实用性，适合社会型和企业型职业。' },
+    'ENFP': { bestFit: ['S', 'A'], description: '你的性格热情和创造性，适合社会型和艺术型职业。' },
+    'ENTP': { bestFit: ['E', 'I'], description: '你的性格创新和分析性，适合企业型和研究型职业。' },
+    'ESTJ': { bestFit: ['E', 'C'], description: '你的性格注重组织和效率，适合企业型和常规型职业。' },
+    'ESFJ': { bestFit: ['S', 'E'], description: '你的性格注重和谐和责任感，适合社会型和企业型职业。' },
+    'ENFJ': { bestFit: ['S', 'E'], description: '你的性格关注他人成长和组织性，适合社会型和企业型职业。' },
+    'ENTJ': { bestFit: ['E', 'I'], description: '你的性格领导力强和战略性，适合企业型和研究型职业。' }
+  };
+  
+  const mbtiInfo = mbtiCareerRelations[mbti_result] || { 
+    bestFit: [], 
+    description: '你的性格组合非常独特，可以考虑探索多种职业领域。' 
+  };
+  
+  const careerTypes = career_result.split('');
+  
+  const matchingTypes = mbtiInfo.bestFit.filter(type => careerTypes.includes(type));
+  const matchPercentage = matchingTypes.length > 0 
+    ? Math.round((matchingTypes.length / Math.min(mbtiInfo.bestFit.length, 2)) * 100) 
+    : 0;
+  
+  const characteristics = findCharacteristics(mbti_result, careerTypes);
+  
+  let recommendedMajorsHTML = '';
+  let majorSectionTitle = '';
+
+  if (selectedDomain === 'history') {
+    const historyMajors = findRecommendedMajors(characteristics, 'history');
+    majorSectionTitle = '历史方向推荐专业';
+    recommendedMajorsHTML = `
+      <ul class="major-list">
+        ${historyMajors.map(([major, score]) => 
+          `<li>
+            <span class="major-name">${major}</span>
+            <button class="major-detail-btn" onclick="showMajorDetail('${major}', ${score})">查看详情</button>
+          </li>`
+        ).join('')}
+      </ul>`;
+  } else if (selectedDomain === 'physics') {
+    const physicsMajors = findRecommendedMajors(characteristics, 'physics');
+    majorSectionTitle = '物理方向推荐专业';
+    recommendedMajorsHTML = `
+      <ul class="major-list">
+        ${physicsMajors.map(([major, score]) => 
+          `<li>
+            <span class="major-name">${major}</span>
+            <button class="major-detail-btn" onclick="showMajorDetail('${major}', ${score})">查看详情</button>
+          </li>`
+        ).join('')}
+      </ul>`;
+  }
+
+
+  const recommendations = getCombinedRecommendations(mbti_result, careerTypes[0], careerTypes[1]);
+  
+  let resultHTML = `
+    <h2>综合分析结果 (${selectedDomain === 'history' ? '历史方向' : '物理方向'})</h2>
+    <div class="combined-results">
+      <div class="combined-section">
+        <div class="combined-header">
+          <div class="combined-icon mbti-icon">MBTI</div>
+          <h3>性格类型: <span class="mbti-type">${mbti_result}</span></h3>
+        </div>
+        <p>${mbti_description}</p>
+      </div>
+      
+      <div class="combined-section">
+        <div class="combined-header">
+          <div class="combined-icon career-icon">RIASEC</div>
+          <h3>职业兴趣: <span class="career-type">${career_result}</span></h3>
+        </div>
+        <p>你的主导职业兴趣类型是 ${getTypeFullName(careerTypes[0])}，次要类型是 ${getTypeFullName(careerTypes[1])}。</p>
+      </div>
+      
+      <div class="combined-analysis">
+        <h3>性格与职业匹配分析</h3>
+        <div class="match-meter">
+          <div class="match-label">匹配度</div>
+          <div class="match-bar">
+            <div class="match-fill" style="width: ${matchPercentage}%"></div>
+          </div>
+          <div class="match-value">${matchPercentage}%</div>
+        </div>
+        <p class="match-description">${mbtiInfo.description}</p>
+        
+        <div class="match-details">
+          <p>基于你的MBTI性格类型(${mbti_result})，你可能适合${mbtiInfo.bestFit.map(t => getTypeFullName(t)).join('和')}相关的职业。</p>
+          <p>你的职业兴趣测试显示你偏好${careerTypes.slice(0, 3).map(t => getTypeFullName(t)).join('、')}类型的工作。</p>
+          ${matchingTypes.length > 0 ? 
+            `<p class="match-highlight">你的性格类型和职业兴趣在${matchingTypes.map(t => getTypeFullName(t)).join('、')}方面有很好的一致性。</p>` : 
+            `<p class="match-alert">你的性格类型和职业兴趣可能有一些差异，这提示你可能需要在工作中更注重平衡。</p>`}
+        </div>
+      </div>
+      
+      <div class="recommended-majors">
+        <h3>推荐专业</h3>
+        <div class="major-section">
+          <h4>${majorSectionTitle}</h4>
+          ${recommendedMajorsHTML}
+        </div>
+        <p class="recommendation-note">专业推荐基于你的MBTI性格类型和Holland职业兴趣类型的特质匹配度计算。匹配度越高，表示该专业所需的特质与你的特质越符合。</p>
+        <div class="major-search-section" style="margin-top: 20px; padding: 15px; background-color: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+          <h4 style="margin: 0 0 12px 0; color: #374151; font-size: 16px;">没有心仪的专业？试试搜索吧～</h4>
+          <div style="display: flex; gap: 10px; align-items: flex-start;">
+            <input 
+              id="major-search-input" 
+              type="text" 
+              placeholder="输入专业名称，如：心理学、计算机科学" 
+              style="flex: 1; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; outline: none;"
+            >
+            <button 
+              id="major-search-btn" 
+              style="padding: 10px 20px; background-color: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; white-space: nowrap;"
+            >
+              搜索
+            </button>
+          </div>
+          <div id="major-search-message" style="margin-top: 8px; font-size: 13px; color: #ef4444;"></div>
+        </div>
+      </div>
+      
+      <div class="career-recommendations">
+        <h3>根据你的综合结果，推荐以下职业方向：</h3>
+        <ul class="recommendations-list">
+          ${recommendations.map(career => `<li>${career}</li>`).join('')}
+        </ul>
+        <p class="recommendation-note">这些推荐基于你的性格特点和职业兴趣的结合分析，但记住，最终的职业选择还应考虑你的个人价值观、能力和实际情况。</p>
+      </div>
+    </div>
+    <div class="combined-actions">
+      <button class="restart-btn" onclick="backToMain()">返回主页</button>
+      <button class="restart-btn secondary-btn" onclick="resetAllTests()">重新测试</button>
+      <button class="restart-btn secondary-btn" onclick="showCombinedResult()">重新选择方向</button>
+    </div>
+  `;
+  
+  appDiv.innerHTML = resultHTML;
+  
+  // 添加专业搜索功能
+  const searchInput = document.getElementById('major-search-input');
+  const searchBtn = document.getElementById('major-search-btn');
+  const searchMsg = document.getElementById('major-search-message');
+  
+  // 修改搜索逻辑以根据selectedDomain选择对应的数据源
+
+if (searchInput && searchBtn && searchMsg) {
+    const performSearch = () => {
+      const searchTerm = searchInput.value.trim();
+      if (!searchTerm) {
+        searchMsg.textContent = '请输入要搜索的专业名称';
+        return;
+      }
+      searchMsg.textContent = '';
+      let majorDataSource = null;
+      if (selectedDomain === 'physics' && typeof major_names_physics === 'object') {
+        majorDataSource = major_names_physics;
+      } else if (selectedDomain === 'history' && typeof major_names_history === 'object') {
+        majorDataSource = major_names_history;
+      } else if (typeof major_names === 'object') {
+        majorDataSource = major_names;
+      }
+      let foundMajor = null;
+      let matchScore = 75;
+      let matchList = [];
+      if (majorDataSource) {
+        // 精确匹配
+        for (const major in majorDataSource) {
+          if (major === searchTerm) {
+            foundMajor = major;
+            break;
+          }
+        }
+        // 模糊匹配
+        if (!foundMajor) {
+          for (const major in majorDataSource) {
+            if (major.includes(searchTerm) || searchTerm.includes(major)) {
+              matchList.push(major);
+            }
+          }
+        }
+        // 关键词宽泛匹配
+        if (!foundMajor && matchList.length === 0) {
+          const searchKeywords = searchTerm.split(/[，,\s]+/);
+          for (const major in majorDataSource) {
+            for (const keyword of searchKeywords) {
+              if (keyword.length > 1 && major.includes(keyword)) {
+                matchList.push(major);
+                break;
+              }
+            }
+          }
+        }
+      }
+      if (foundMajor) {
+        showMajorDetail(foundMajor, matchScore);
+      } else if (matchList.length === 1) {
+        showMajorDetail(matchList[0], matchScore);
+      } else if (matchList.length > 1) {
+        // 多个匹配，弹窗让用户选择
+        showOptionsToUser(matchList, (selected) => {
+          if (selected) {
+            showMajorDetail(selected, matchScore);
+          }
+        });
+      } else {
+        const domainText = selectedDomain === 'physics' ? '物理方向' : 
+                          selectedDomain === 'history' ? '历史方向' : '当前方向';
+        searchMsg.textContent = `未找到"${searchTerm}"在${domainText}中的相关专业，请尝试其他关键词`;
+      }
+    };
+    searchBtn.addEventListener('click', performSearch);
+    searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        performSearch();
+      }
+    });
+    searchInput.addEventListener('focus', () => {
+      searchMsg.textContent = '';
+    });
+  }
 }
 
 // 获取类型全称
