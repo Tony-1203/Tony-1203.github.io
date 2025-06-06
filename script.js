@@ -2387,7 +2387,7 @@ if (searchInput && searchBtn && searchMsg) {
       } else {
         const domainText = selectedDomain === 'physics' ? '物理方向' : 
                           selectedDomain === 'history' ? '历史方向' : '当前方向';
-        searchMsg.textContent = `未找到"${searchTerm}"在${domainText}中的相关专业，请尝试其他关键词`;
+        searchMsg.textContent = `未在${domainText}中找到"${searchTerm}"的相关专业，请尝试其他关键词`;
       }
     };
     searchBtn.addEventListener('click', performSearch);
