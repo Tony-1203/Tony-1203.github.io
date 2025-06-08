@@ -838,6 +838,27 @@ h2 {
   background-color: #ef4444;
 }
 
+/* 录取人数样式 */
+.admission-count {
+  display: inline-flex;
+  align-items: center;
+  background-color: #10b981;
+  color: #ffffff;
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-left: 1px;
+}
+
+.admission-icon {
+  margin-right: 3px;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
 /* 移动端适配 */
 @media (max-width: 640px) {
   .modal-content {
@@ -859,6 +880,23 @@ h2 {
   }
   
   .school-score {
+    margin-top: 5px;
+  }
+  
+  /* 录取人数移动端适配 */
+  .admission-count {
+    margin-left: 0;
+    margin-top: 5px;
+    font-size: 12px;
+  }
+  
+  .probability-list li {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  
+  .probability-value {
     margin-top: 5px;
   }
 }

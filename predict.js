@@ -48,6 +48,8 @@ function estimateProbGeneral(ranks, yourRank, weights = null, trendWeight = 0.4,
     ranks = ranks.filter(rank => !isNaN(rank) && rank > 0).sort((a, b) => a - b);
     const n = ranks.length;
 
+    console.log("大学排名数据:", ranks);
+
     if (n === 1) {
         const mu = ranks[0];
         const sigma = estimateSigmaFromRank(mu);
@@ -79,6 +81,12 @@ function estimateProbGeneral(ranks, yourRank, weights = null, trendWeight = 0.4,
         const sigma = Math.max(sampleStd(ranks), 80);
         const probability = 1 - normalCDF(yourRank, mu, sigma);
         return { probability, mu, sigma, r_trend, mu_weighted };
+    }
+
+    if (n === 4) {
+        // 除去ranks中最后的数据
+        ranks = ranks.slice(0, -1);
+        return estimateProbGeneral(ranks, yourRank, weights, trendWeight, trendRatio);
     }
 
     throw new Error("仅支持1~3年数据");
