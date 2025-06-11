@@ -3,6 +3,9 @@
 // 全局变量存储当前用户信息
 let currentUserData = null;
 
+// 全局变量：测试限制次数
+const MAX_TEST_ATTEMPTS = 1;
+
 // 当页面加载完成时，检查用户是否已登录
 document.addEventListener('DOMContentLoaded', function() {
     checkAuthStatus();
@@ -415,11 +418,11 @@ async function checkAndIncrementTestCount(testType) {
         const currentCount = testType === 'mbti' ? (currentCounts.mbti_count || 0) : (currentCounts.career_count || 0);
 
         // 检查是否已达到限制
-        if (currentCount >= 3) {
+        if (currentCount >= MAX_TEST_ATTEMPTS) {
             const testName = testType === 'mbti' ? 'MBTI性格测试' : '职业兴趣测试';
             return { 
                 canTake: false, 
-                error: `您已完成${testName}${currentCount}次，已达到最大次数限制（3次）` 
+                error: `您已完成${testName}${currentCount}次，已达到最大次数限制（${MAX_TEST_ATTEMPTS}次）` 
             };
         }
 
@@ -463,7 +466,7 @@ async function checkAndIncrementTestCount(testType) {
         }
 
         const newCount = currentCount + 1;
-        const remainingAttempts = 3 - newCount;
+        const remainingAttempts = MAX_TEST_ATTEMPTS - newCount;
         return { 
             canTake: true, 
             newCount: newCount,
