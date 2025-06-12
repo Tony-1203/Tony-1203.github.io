@@ -959,7 +959,7 @@ function predictAdmissionProbability(detail, userRank) {
         schoolRanks[i] = rank;
       } else {
         // 如果没有匹配，使用该年份 rank 表中的第一个值
-        const firstRank = Object.values(scoreRankMap)[0];
+        const firstRank = Object.values(scoreRankMap).at(-1);
         schoolRanks[i] = firstRank;
       }
     }
